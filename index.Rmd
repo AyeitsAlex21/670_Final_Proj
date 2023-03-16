@@ -1,14 +1,54 @@
 ---
-title: "R Notebook"
+title: "CS 670 Final Project R Notebook"
 output: html_notebook
 ---
+#
+**Introduction**
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Noteboo. When you execute code within the notebook, the results appear beneath the code. 
+For my project, I plan to work with the College dataset located in the ISLR2 library created by the authors of the book "An Introduction to Statistical Learning with Applications in R". This dataset was collected by sampling information from 777 colleges from the 1995 issue of US News and World Report which is a news magazine that publishes rankings of colleges within the US. The purpose of collecting this data was to provide a resource for students and researchers to explore the correlation between different factors and the performance of US colleges. Each college is represented in 18 different columns containing statistics on various aspects of that college which include:
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+1. Private: A factor indicating whether the college is private or public.
+2. Apps: The number of applications received by the college.
+3. Accept: The number of applications accepted by the college.
+4. Enroll: The number of students enrolled at the college.
+5. Top10perc: The percentage of students at the college who scored in the top 10% of their high school classes.
+6. Top25perc: The percentage of students at the college who scored in the top 25% of their high school classes.
+7. F.Undergrad: The number of full time undergraduates at the college.
+8. P.Undergrad: The number of part time undergraduates at the college.
+9. Outstate: The out-of-state tuition for the college.
+10. Room.Board: The cost of room and board at the college.
+11. Books: The estimated cost of books for a year of study at the college.
+12. Personal: The estimated personal expenses for a year of study at the college.
+13. PhD: The percentage of faculty at the college with PhDs.
+14. Terminal: The percentage of faculty at the college with terminal degrees
+15. S.F.Ratio: The student to faculty ratio at the college.
+16. perc.alumni: The percentage of alumni who donate to the college.
+17. Expend: The instructional expenditure per student at the college.
+18. Grad.Rate: The graduation rate for the college.
 
+Some representation decisions were made when creating this dataset. For example, the Private column was coded as a factor with two levels, "Yes" and "No," rather than a numerical value. This decision was made to avoid issues with comparing private and public colleges based on cost, admission rates, or other factors. Also, the Ph.D. and Terminal columns were represented as percentages rather than numbers to provide a better representation of the faculty's qualifications.
+
+
+#
+**Questions**
+
+My objective is to explore what factors are correlated with a college's acceptance rate, graduation rate, and cost of room and board. This analysis will offer insights into the state of higher education in the US and identify what is being paid for. The results of my study could be useful for others who are looking to choose the best college for their needs.
+
+/* -----------------------------------
+MAYBE USE THIS LATER?
+
+To achieve my goal, I plan to use a linear regression model to predict the qualitative responses. I will experiment with interaction variables and polynomial fits to optimize the accuracy of my model. I also plan to apply cross-validation and regularization techniques to ensure the validity of my model, specifically using the Lasso method as I anticipate that not all variables will be linked to the response.
+
+This project will provide valuable insights into the correlation between different factors and the performance of US colleges. Through the use of statistical analysis and machine learning techniques, I aim to determine which variables are most significant and provide recommendations for students who are seeking to select the best college for their needs.
+*/ -----------------------------------
+
+**Visualization**
+
+To understand our data before we fit a model to it we can import our data set and run pairs to see scatterplots between each of the columns.
 ```{r}
-plot(cars)
+install.packages("ISLR2")
+library(ISLR2)
+print(pairs(College))
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.

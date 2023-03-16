@@ -11,7 +11,7 @@
 
 
 
-<title>R Notebook</title>
+<title>CS 670 Final Project R Notebook</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1746,22 +1746,95 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">R Notebook</h1>
+<h1 class="title toc-ignore">CS 670 Final Project R Notebook</h1>
 
 </div>
 
 
 <!-- rnb-text-begin -->
-<p>This is an <a href="http://rmarkdown.rstudio.com">R Markdown</a>
-Noteboo. When you execute code within the notebook, the results appear
-beneath the code.</p>
-<p>Try executing this chunk by clicking the <em>Run</em> button within
-the chunk or by placing your cursor inside it and pressing
-<em>Ctrl+Shift+Enter</em>.</p>
+<div id="section" class="section level1">
+<h1></h1>
+<p><strong>Introduction</strong></p>
+<p>For my project, I plan to work with the College dataset located in
+the ISLR2 library created by the authors of the book “An Introduction to
+Statistical Learning with Applications in R”. This dataset was collected
+by sampling information from 777 colleges from the 1995 issue of US News
+and World Report which is a news magazine that publishes rankings of
+colleges within the US. The purpose of collecting this data was to
+provide a resource for students and researchers to explore the
+correlation between different factors and the performance of US
+colleges. Each college is represented in 18 different columns containing
+statistics on various aspects of that college which include:</p>
+<ol style="list-style-type: decimal">
+<li>Private: A factor indicating whether the college is private or
+public.</li>
+<li>Apps: The number of applications received by the college.</li>
+<li>Accept: The number of applications accepted by the college.</li>
+<li>Enroll: The number of students enrolled at the college.</li>
+<li>Top10perc: The percentage of students at the college who scored in
+the top 10% of their high school classes.</li>
+<li>Top25perc: The percentage of students at the college who scored in
+the top 25% of their high school classes.</li>
+<li>F.Undergrad: The number of full time undergraduates at the
+college.</li>
+<li>P.Undergrad: The number of part time undergraduates at the
+college.</li>
+<li>Outstate: The out-of-state tuition for the college.</li>
+<li>Room.Board: The cost of room and board at the college.</li>
+<li>Books: The estimated cost of books for a year of study at the
+college.</li>
+<li>Personal: The estimated personal expenses for a year of study at the
+college.</li>
+<li>PhD: The percentage of faculty at the college with PhDs.</li>
+<li>Terminal: The percentage of faculty at the college with terminal
+degrees</li>
+<li>S.F.Ratio: The student to faculty ratio at the college.</li>
+<li>perc.alumni: The percentage of alumni who donate to the
+college.</li>
+<li>Expend: The instructional expenditure per student at the
+college.</li>
+<li>Grad.Rate: The graduation rate for the college.</li>
+</ol>
+<p>Some representation decisions were made when creating this dataset.
+For example, the Private column was coded as a factor with two levels,
+“Yes” and “No,” rather than a numerical value. This decision was made to
+avoid issues with comparing private and public colleges based on cost,
+admission rates, or other factors. Also, the Ph.D. and Terminal columns
+were represented as percentages rather than numbers to provide a better
+representation of the faculty’s qualifications.</p>
+</div>
+<div id="section-1" class="section level1">
+<h1></h1>
+<p><strong>Questions</strong></p>
+<p>My objective is to explore what factors are correlated with a
+college’s acceptance rate, graduation rate, and cost of room and board.
+This analysis will offer insights into the state of higher education in
+the US and identify what is being paid for. The results of my study
+could be useful for others who are looking to choose the best college
+for their needs.</p>
+<p>/* ———————————– MAYBE USE THIS LATER?</p>
+<p>To achieve my goal, I plan to use a linear regression model to
+predict the qualitative responses. I will experiment with interaction
+variables and polynomial fits to optimize the accuracy of my model. I
+also plan to apply cross-validation and regularization techniques to
+ensure the validity of my model, specifically using the Lasso method as
+I anticipate that not all variables will be linked to the response.</p>
+<p>This project will provide valuable insights into the correlation
+between different factors and the performance of US colleges. Through
+the use of statistical analysis and machine learning techniques, I aim
+to determine which variables are most significant and provide
+recommendations for students who are seeking to select the best college
+for their needs. */ ———————————–</p>
+<p><strong>Visualization</strong></p>
+<p>To understand our data before we fit a model to it we can import our
+data set and run pairs to see scatterplots between each of the
+columns.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxvdChjYXJzKVxuYGBgIn0= -->
-<pre class="r"><code>plot(cars)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaW5zdGFsbC5wYWNrYWdlcyhcIklTTFIyXCIpXG5saWJyYXJ5KElTTFIyKVxucHJpbnQocGFpcnMoQ29sbGVnZSkpXG5gYGAifQ== -->
+<pre class="r"><code>install.packages(&quot;ISLR2&quot;)
+library(ISLR2)
+print(pairs(College))</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1775,8 +1848,9 @@ editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not
 run any R code chunks. Instead, the output of the chunk when it was last
 run in the editor is displayed.</p>
 <!-- rnb-text-end -->
+</div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpUaGlzIGlzIGFuIFtSIE1hcmtkb3duXShodHRwOi8vcm1hcmtkb3duLnJzdHVkaW8uY29tKSBOb3RlYm9vLiBXaGVuIHlvdSBleGVjdXRlIGNvZGUgd2l0aGluIHRoZSBub3RlYm9vaywgdGhlIHJlc3VsdHMgYXBwZWFyIGJlbmVhdGggdGhlIGNvZGUuIA0KDQpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ3RybCtTaGlmdCtFbnRlciouIA0KDQpgYGB7cn0NCnBsb3QoY2FycykNCmBgYA0KDQpBZGQgYSBuZXcgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpJbnNlcnQgQ2h1bmsqIGJ1dHRvbiBvbiB0aGUgdG9vbGJhciBvciBieSBwcmVzc2luZyAqQ3RybCtBbHQrSSouDQoNCldoZW4geW91IHNhdmUgdGhlIG5vdGVib29rLCBhbiBIVE1MIGZpbGUgY29udGFpbmluZyB0aGUgY29kZSBhbmQgb3V0cHV0IHdpbGwgYmUgc2F2ZWQgYWxvbmdzaWRlIGl0IChjbGljayB0aGUgKlByZXZpZXcqIGJ1dHRvbiBvciBwcmVzcyAqQ3RybCtTaGlmdCtLKiB0byBwcmV2aWV3IHRoZSBIVE1MIGZpbGUpLg0KDQpUaGUgcHJldmlldyBzaG93cyB5b3UgYSByZW5kZXJlZCBIVE1MIGNvcHkgb2YgdGhlIGNvbnRlbnRzIG9mIHRoZSBlZGl0b3IuIENvbnNlcXVlbnRseSwgdW5saWtlICpLbml0KiwgKlByZXZpZXcqIGRvZXMgbm90IHJ1biBhbnkgUiBjb2RlIGNodW5rcy4gSW5zdGVhZCwgdGhlIG91dHB1dCBvZiB0aGUgY2h1bmsgd2hlbiBpdCB3YXMgbGFzdCBydW4gaW4gdGhlIGVkaXRvciBpcyBkaXNwbGF5ZWQuDQo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNTIDY3MCBGaW5hbCBQcm9qZWN0IFIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KIw0KKipJbnRyb2R1Y3Rpb24qKg0KDQpGb3IgbXkgcHJvamVjdCwgSSBwbGFuIHRvIHdvcmsgd2l0aCB0aGUgQ29sbGVnZSBkYXRhc2V0IGxvY2F0ZWQgaW4gdGhlIElTTFIyIGxpYnJhcnkgY3JlYXRlZCBieSB0aGUgYXV0aG9ycyBvZiB0aGUgYm9vayAiQW4gSW50cm9kdWN0aW9uIHRvIFN0YXRpc3RpY2FsIExlYXJuaW5nIHdpdGggQXBwbGljYXRpb25zIGluIFIiLiBUaGlzIGRhdGFzZXQgd2FzIGNvbGxlY3RlZCBieSBzYW1wbGluZyBpbmZvcm1hdGlvbiBmcm9tIDc3NyBjb2xsZWdlcyBmcm9tIHRoZSAxOTk1IGlzc3VlIG9mIFVTIE5ld3MgYW5kIFdvcmxkIFJlcG9ydCB3aGljaCBpcyBhIG5ld3MgbWFnYXppbmUgdGhhdCBwdWJsaXNoZXMgcmFua2luZ3Mgb2YgY29sbGVnZXMgd2l0aGluIHRoZSBVUy4gVGhlIHB1cnBvc2Ugb2YgY29sbGVjdGluZyB0aGlzIGRhdGEgd2FzIHRvIHByb3ZpZGUgYSByZXNvdXJjZSBmb3Igc3R1ZGVudHMgYW5kIHJlc2VhcmNoZXJzIHRvIGV4cGxvcmUgdGhlIGNvcnJlbGF0aW9uIGJldHdlZW4gZGlmZmVyZW50IGZhY3RvcnMgYW5kIHRoZSBwZXJmb3JtYW5jZSBvZiBVUyBjb2xsZWdlcy4gRWFjaCBjb2xsZWdlIGlzIHJlcHJlc2VudGVkIGluIDE4IGRpZmZlcmVudCBjb2x1bW5zIGNvbnRhaW5pbmcgc3RhdGlzdGljcyBvbiB2YXJpb3VzIGFzcGVjdHMgb2YgdGhhdCBjb2xsZWdlIHdoaWNoIGluY2x1ZGU6DQoNCjEuIFByaXZhdGU6IEEgZmFjdG9yIGluZGljYXRpbmcgd2hldGhlciB0aGUgY29sbGVnZSBpcyBwcml2YXRlIG9yIHB1YmxpYy4NCjIuIEFwcHM6IFRoZSBudW1iZXIgb2YgYXBwbGljYXRpb25zIHJlY2VpdmVkIGJ5IHRoZSBjb2xsZWdlLg0KMy4gQWNjZXB0OiBUaGUgbnVtYmVyIG9mIGFwcGxpY2F0aW9ucyBhY2NlcHRlZCBieSB0aGUgY29sbGVnZS4NCjQuIEVucm9sbDogVGhlIG51bWJlciBvZiBzdHVkZW50cyBlbnJvbGxlZCBhdCB0aGUgY29sbGVnZS4NCjUuIFRvcDEwcGVyYzogVGhlIHBlcmNlbnRhZ2Ugb2Ygc3R1ZGVudHMgYXQgdGhlIGNvbGxlZ2Ugd2hvIHNjb3JlZCBpbiB0aGUgdG9wIDEwJSBvZiB0aGVpciBoaWdoIHNjaG9vbCBjbGFzc2VzLg0KNi4gVG9wMjVwZXJjOiBUaGUgcGVyY2VudGFnZSBvZiBzdHVkZW50cyBhdCB0aGUgY29sbGVnZSB3aG8gc2NvcmVkIGluIHRoZSB0b3AgMjUlIG9mIHRoZWlyIGhpZ2ggc2Nob29sIGNsYXNzZXMuDQo3LiBGLlVuZGVyZ3JhZDogVGhlIG51bWJlciBvZiBmdWxsIHRpbWUgdW5kZXJncmFkdWF0ZXMgYXQgdGhlIGNvbGxlZ2UuDQo4LiBQLlVuZGVyZ3JhZDogVGhlIG51bWJlciBvZiBwYXJ0IHRpbWUgdW5kZXJncmFkdWF0ZXMgYXQgdGhlIGNvbGxlZ2UuDQo5LiBPdXRzdGF0ZTogVGhlIG91dC1vZi1zdGF0ZSB0dWl0aW9uIGZvciB0aGUgY29sbGVnZS4NCjEwLiBSb29tLkJvYXJkOiBUaGUgY29zdCBvZiByb29tIGFuZCBib2FyZCBhdCB0aGUgY29sbGVnZS4NCjExLiBCb29rczogVGhlIGVzdGltYXRlZCBjb3N0IG9mIGJvb2tzIGZvciBhIHllYXIgb2Ygc3R1ZHkgYXQgdGhlIGNvbGxlZ2UuDQoxMi4gUGVyc29uYWw6IFRoZSBlc3RpbWF0ZWQgcGVyc29uYWwgZXhwZW5zZXMgZm9yIGEgeWVhciBvZiBzdHVkeSBhdCB0aGUgY29sbGVnZS4NCjEzLiBQaEQ6IFRoZSBwZXJjZW50YWdlIG9mIGZhY3VsdHkgYXQgdGhlIGNvbGxlZ2Ugd2l0aCBQaERzLg0KMTQuIFRlcm1pbmFsOiBUaGUgcGVyY2VudGFnZSBvZiBmYWN1bHR5IGF0IHRoZSBjb2xsZWdlIHdpdGggdGVybWluYWwgZGVncmVlcw0KMTUuIFMuRi5SYXRpbzogVGhlIHN0dWRlbnQgdG8gZmFjdWx0eSByYXRpbyBhdCB0aGUgY29sbGVnZS4NCjE2LiBwZXJjLmFsdW1uaTogVGhlIHBlcmNlbnRhZ2Ugb2YgYWx1bW5pIHdobyBkb25hdGUgdG8gdGhlIGNvbGxlZ2UuDQoxNy4gRXhwZW5kOiBUaGUgaW5zdHJ1Y3Rpb25hbCBleHBlbmRpdHVyZSBwZXIgc3R1ZGVudCBhdCB0aGUgY29sbGVnZS4NCjE4LiBHcmFkLlJhdGU6IFRoZSBncmFkdWF0aW9uIHJhdGUgZm9yIHRoZSBjb2xsZWdlLg0KDQpTb21lIHJlcHJlc2VudGF0aW9uIGRlY2lzaW9ucyB3ZXJlIG1hZGUgd2hlbiBjcmVhdGluZyB0aGlzIGRhdGFzZXQuIEZvciBleGFtcGxlLCB0aGUgUHJpdmF0ZSBjb2x1bW4gd2FzIGNvZGVkIGFzIGEgZmFjdG9yIHdpdGggdHdvIGxldmVscywgIlllcyIgYW5kICJObywiIHJhdGhlciB0aGFuIGEgbnVtZXJpY2FsIHZhbHVlLiBUaGlzIGRlY2lzaW9uIHdhcyBtYWRlIHRvIGF2b2lkIGlzc3VlcyB3aXRoIGNvbXBhcmluZyBwcml2YXRlIGFuZCBwdWJsaWMgY29sbGVnZXMgYmFzZWQgb24gY29zdCwgYWRtaXNzaW9uIHJhdGVzLCBvciBvdGhlciBmYWN0b3JzLiBBbHNvLCB0aGUgUGguRC4gYW5kIFRlcm1pbmFsIGNvbHVtbnMgd2VyZSByZXByZXNlbnRlZCBhcyBwZXJjZW50YWdlcyByYXRoZXIgdGhhbiBudW1iZXJzIHRvIHByb3ZpZGUgYSBiZXR0ZXIgcmVwcmVzZW50YXRpb24gb2YgdGhlIGZhY3VsdHkncyBxdWFsaWZpY2F0aW9ucy4NCg0KDQojDQoqKlF1ZXN0aW9ucyoqDQoNCk15IG9iamVjdGl2ZSBpcyB0byBleHBsb3JlIHdoYXQgZmFjdG9ycyBhcmUgY29ycmVsYXRlZCB3aXRoIGEgY29sbGVnZSdzIGFjY2VwdGFuY2UgcmF0ZSwgZ3JhZHVhdGlvbiByYXRlLCBhbmQgY29zdCBvZiByb29tIGFuZCBib2FyZC4gVGhpcyBhbmFseXNpcyB3aWxsIG9mZmVyIGluc2lnaHRzIGludG8gdGhlIHN0YXRlIG9mIGhpZ2hlciBlZHVjYXRpb24gaW4gdGhlIFVTIGFuZCBpZGVudGlmeSB3aGF0IGlzIGJlaW5nIHBhaWQgZm9yLiBUaGUgcmVzdWx0cyBvZiBteSBzdHVkeSBjb3VsZCBiZSB1c2VmdWwgZm9yIG90aGVycyB3aG8gYXJlIGxvb2tpbmcgdG8gY2hvb3NlIHRoZSBiZXN0IGNvbGxlZ2UgZm9yIHRoZWlyIG5lZWRzLg0KDQovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KTUFZQkUgVVNFIFRISVMgTEFURVI/DQoNClRvIGFjaGlldmUgbXkgZ29hbCwgSSBwbGFuIHRvIHVzZSBhIGxpbmVhciByZWdyZXNzaW9uIG1vZGVsIHRvIHByZWRpY3QgdGhlIHF1YWxpdGF0aXZlIHJlc3BvbnNlcy4gSSB3aWxsIGV4cGVyaW1lbnQgd2l0aCBpbnRlcmFjdGlvbiB2YXJpYWJsZXMgYW5kIHBvbHlub21pYWwgZml0cyB0byBvcHRpbWl6ZSB0aGUgYWNjdXJhY3kgb2YgbXkgbW9kZWwuIEkgYWxzbyBwbGFuIHRvIGFwcGx5IGNyb3NzLXZhbGlkYXRpb24gYW5kIHJlZ3VsYXJpemF0aW9uIHRlY2huaXF1ZXMgdG8gZW5zdXJlIHRoZSB2YWxpZGl0eSBvZiBteSBtb2RlbCwgc3BlY2lmaWNhbGx5IHVzaW5nIHRoZSBMYXNzbyBtZXRob2QgYXMgSSBhbnRpY2lwYXRlIHRoYXQgbm90IGFsbCB2YXJpYWJsZXMgd2lsbCBiZSBsaW5rZWQgdG8gdGhlIHJlc3BvbnNlLg0KDQpUaGlzIHByb2plY3Qgd2lsbCBwcm92aWRlIHZhbHVhYmxlIGluc2lnaHRzIGludG8gdGhlIGNvcnJlbGF0aW9uIGJldHdlZW4gZGlmZmVyZW50IGZhY3RvcnMgYW5kIHRoZSBwZXJmb3JtYW5jZSBvZiBVUyBjb2xsZWdlcy4gVGhyb3VnaCB0aGUgdXNlIG9mIHN0YXRpc3RpY2FsIGFuYWx5c2lzIGFuZCBtYWNoaW5lIGxlYXJuaW5nIHRlY2huaXF1ZXMsIEkgYWltIHRvIGRldGVybWluZSB3aGljaCB2YXJpYWJsZXMgYXJlIG1vc3Qgc2lnbmlmaWNhbnQgYW5kIHByb3ZpZGUgcmVjb21tZW5kYXRpb25zIGZvciBzdHVkZW50cyB3aG8gYXJlIHNlZWtpbmcgdG8gc2VsZWN0IHRoZSBiZXN0IGNvbGxlZ2UgZm9yIHRoZWlyIG5lZWRzLg0KKi8gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCg0KKipWaXN1YWxpemF0aW9uKioNCg0KVG8gdW5kZXJzdGFuZCBvdXIgZGF0YSBiZWZvcmUgd2UgZml0IGEgbW9kZWwgdG8gaXQgd2UgY2FuIGltcG9ydCBvdXIgZGF0YSBzZXQgYW5kIHJ1biBwYWlycyB0byBzZWUgc2NhdHRlcnBsb3RzIGJldHdlZW4gZWFjaCBvZiB0aGUgY29sdW1ucy4NCmBgYHtyfQ0KaW5zdGFsbC5wYWNrYWdlcygiSVNMUjIiKQ0KbGlicmFyeShJU0xSMikNCnByaW50KHBhaXJzKENvbGxlZ2UpKQ0KYGBgDQoNCkFkZCBhIG5ldyBjaHVuayBieSBjbGlja2luZyB0aGUgKkluc2VydCBDaHVuayogYnV0dG9uIG9uIHRoZSB0b29sYmFyIG9yIGJ5IHByZXNzaW5nICpDdHJsK0FsdCtJKi4NCg0KV2hlbiB5b3Ugc2F2ZSB0aGUgbm90ZWJvb2ssIGFuIEhUTUwgZmlsZSBjb250YWluaW5nIHRoZSBjb2RlIGFuZCBvdXRwdXQgd2lsbCBiZSBzYXZlZCBhbG9uZ3NpZGUgaXQgKGNsaWNrIHRoZSAqUHJldmlldyogYnV0dG9uIG9yIHByZXNzICpDdHJsK1NoaWZ0K0sqIHRvIHByZXZpZXcgdGhlIEhUTUwgZmlsZSkuDQoNClRoZSBwcmV2aWV3IHNob3dzIHlvdSBhIHJlbmRlcmVkIEhUTUwgY29weSBvZiB0aGUgY29udGVudHMgb2YgdGhlIGVkaXRvci4gQ29uc2VxdWVudGx5LCB1bmxpa2UgKktuaXQqLCAqUHJldmlldyogZG9lcyBub3QgcnVuIGFueSBSIGNvZGUgY2h1bmtzLiBJbnN0ZWFkLCB0aGUgb3V0cHV0IG9mIHRoZSBjaHVuayB3aGVuIGl0IHdhcyBsYXN0IHJ1biBpbiB0aGUgZWRpdG9yIGlzIGRpc3BsYXllZC4NCg==</div>
 
 
 
