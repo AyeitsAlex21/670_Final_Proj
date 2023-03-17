@@ -32,27 +32,122 @@ Some representation decisions were made when creating this dataset. For example,
 #
 **Questions**
 
-My objective is to explore what factors are correlated with a college's acceptance rate, graduation rate, and cost of room and board. This analysis will offer insights into the state of higher education in the US and identify what is being paid for. The results of my study could be useful for others who are looking to choose the best college for their needs.
-
-/* -----------------------------------
-MAYBE USE THIS LATER?
-
-To achieve my goal, I plan to use a linear regression model to predict the qualitative responses. I will experiment with interaction variables and polynomial fits to optimize the accuracy of my model. I also plan to apply cross-validation and regularization techniques to ensure the validity of my model, specifically using the Lasso method as I anticipate that not all variables will be linked to the response.
-
-This project will provide valuable insights into the correlation between different factors and the performance of US colleges. Through the use of statistical analysis and machine learning techniques, I aim to determine which variables are most significant and provide recommendations for students who are seeking to select the best college for their needs.
-*/ -----------------------------------
+My objective is to explore what factors are most correlated with a college's graduation rate as well as to be able to predict accurately a new colleges graduation rate given some data. This analysis will offer insights into the state of higher education in the US and identify what is being paid for. The results of my study could be useful for others who are looking to choose the best college for their needs.
 
 **Visualization**
 
-To understand our data before we fit a model to it we can import our data set and run pairs to see scatterplots between each of the columns.
+To understand and gain insights into patterns and trends within the data that are not immediately visible its important to visualize our data. We first can load up all of our libraries we will need and convert all the quantitative data into qualitative using this and saving it into the College_data variable.
+
 ```{r}
-install.packages("ISLR2")
 library(ISLR2)
-print(pairs(College))
+library(ggplot2)
+library(dplyr)
+library(glmnet)
+library(caret)
+
+College_data = College_quant_data <- na.omit(College) %>%
+  mutate_all(~ if(is.factor(.)) {
+    as.numeric(as.factor(.))
+  } else {
+    .
+  })
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+We can then start to visualize our data by creating a scatter plot matrices for each variable we are investigating between all other variables as well as listing their correlations.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+First we will start with visualizing the scatter plots for the Graduation Rate to see if there's any visual correlations there.
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+par(mfrow = c(3, 3))
+
+colnames <- names(College_data)
+
+for (i in 2:length(colnames) - 1) {
+  # make scatter plot of Grad.Rate against the current predictor
+  plot(College[,i], College$Grad.Rate, xlab = colnames[i], ylab = "Grad.Rate")
+}
+cor(College_data)[- which(colnames(College) == "Grad.Rate"), "Grad.Rate"] # print out correlations except the grad to grad
+```
+
+Analyzing the graphs and the correlations we can see that the Private, Top10perc, Top20prec, Outstate, Room.Board, phD, S.F.Ratio, perc.alumni and Expend have evidence of being moderately correlated with the Graduation Rate. Using this information we can hypothesize before we fit our model that some of these variables can be related to Graduation rate.
+
+**Modeling**
+
+To achieve my goal, I plan to first use a linear regression model to predict the qualitative responses. I will also experiment with using random forests and decision trees. I also plan to apply k-fold cross-validation and Lasso to ensure the validity of my model, specifically using the Lasso method as I anticipate that not all variables will be linked to the response.
+
+To start we divide the data to be 70% training and 30% testing.
+
+```{r}
+set.seed(5) 
+
+alpha = 1
+k = 10
+lambda = 10^seq(10, -2, length = 100)
+
+# Divide the data into training and test
+x = model.matrix(Grad.Rate ~ ., data = College_data)[, -1]
+y = College_data$Grad.Rate
+
+train = sample(1:nrow(x), 0.7*nrow(x)) # 70% training data
+test = (-train)
+y.test <- y[test]
+```
+
+Then using these two sets of data we can fit a linear regression model using k-folds and Lasso to predict the Graduation rate.
+
+```{r}
+#----------------------------------------------------------------
+# Fit on training data
+shrink.mod <- glmnet(x[train,], y[train], alpha = alpha, lambda = lambda, family="gaussian")
+
+#------------------------------------------------
+# preform cross validation to get the best lambda
+
+cv.out = cv.glmnet(x[train,], y[train], alpha=alpha, nfolds=k, family="gaussian")
+bestlam = cv.out$lambda.min
+
+#----------------------------------------------
+# Generalization Error
+shrink.pred <- predict(shrink.mod , s = bestlam , newx = x[test, ], family="gaussian")
+
+MSE =  mean((shrink.pred - y.test)^2)
+
+message(sprintf("The Mean Squared error is %f", MSE))
+```
+
+Now we do it with a decision tree with cross validation.
+
+```{r}
+# This time partition our data using indexing
+trainIndex <- createDataPartition(College_data$Grad.Rate, p = 0.7, list = FALSE)
+training <- College_data[trainIndex, ]
+testing <- College_data[-trainIndex, ]
+
+library(rpart)
+#----------------------------------------------------------------
+# Fit a decision tree on the training data
+fit.tree = rpart(Grad.Rate ~ ., data=training)
+
+#------------------------------------------------
+# preform cross validation to get the best fit
+
+cv = trainControl(method = "cv", number = 10)
+cv.fit = train(Grad.Rate ~ ., data = training, method = "rpart", trControl = cv)
+
+#----------------------------------------------
+# Generalization error
+
+pred = predict(fit.tree, testing)
+mseTree = mean((pred - testing$Grad.Rate)^2)
+
+pred = predict(cv.fit, testing)
+mseCrossTree = mean((pred - testing$Grad.Rate)^2)
+
+summary(fit.tree)
+message(sprintf("The Mean Squared error of the decision tree is %f", mseTree))
+message(sprintf("The Mean Squared error of the k-fold cross validation decision tree is %f", mseCrossTree))
+```
+
+**Results**
+
+This project will provide valuable insights into the correlation between different factors and the performance of US colleges. Through the use of statistical analysis and machine learning techniques, I aim to determine which variables are most significant and provide recommendations for students who are seeking to select the best college for their needs.
