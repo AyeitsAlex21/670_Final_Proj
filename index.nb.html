@@ -1752,9 +1752,9 @@ display: none;
 
 
 <!-- rnb-text-begin -->
-<div id="section" class="section level1">
-<h1></h1>
-<p><strong>Introduction</strong></p>
+<h1 style="font-size: 30px;">
+Introduction
+</h1>
 <p>For my project, I plan to work with the College dataset located in
 the ISLR2 library created by the authors of the book “An Introduction to
 Statistical Learning with Applications in R”. This dataset was collected
@@ -1802,17 +1802,18 @@ avoid issues with comparing private and public colleges based on cost,
 admission rates, or other factors. Also, the Ph.D. and Terminal columns
 were represented as percentages rather than numbers to provide a better
 representation of the faculty’s qualifications.</p>
-</div>
-<div id="section-1" class="section level1">
-<h1></h1>
-<p><strong>Questions</strong></p>
+<h1 style="font-size: 30px;">
+Questions
+</h1>
 <p>My objective is to explore what factors are most correlated with a
 college’s graduation rate as well as to be able to predict accurately a
 new colleges graduation rate given some data. This analysis will offer
 insights into the state of higher education in the US and identify what
 is being paid for. The results of my study could be useful for others
 who are looking to choose the best college for their needs.</p>
-<p><strong>Visualization</strong></p>
+<h1 style="font-size: 30px;">
+Visualization
+</h1>
 <p>To understand and gain insights into patterns and trends within the
 data that are not immediately visible its important to visualize our
 data. We first can load up all of our libraries we will need and convert
@@ -1878,7 +1879,9 @@ perc.alumni and Expend have evidence of being moderately correlated with
 the Graduation Rate. Using this information we can hypothesize before we
 fit our model that some of these variables can be related to Graduation
 rate.</p>
-<p><strong>Modeling</strong></p>
+<h1 style="font-size: 30px;">
+Modeling
+</h1>
 <p>To achieve my goal, I plan to first use a linear regression model to
 predict the qualitative responses. I will also experiment with using
 random forests and decision trees. I also plan to apply k-fold
@@ -1888,8 +1891,8 @@ variables will be linked to the response.</p>
 <p>To start we divide the data to be 70% training and 30% testing.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0LnNlZWQoNSkgXG5cbmFscGhhID0gMVxuayA9IDEwXG5sYW1iZGEgPSAxMF5zZXEoMTAsIC0yLCBsZW5ndGggPSAxMDApXG5cbiMgRGl2aWRlIHRoZSBkYXRhIGludG8gdHJhaW5pbmcgYW5kIHRlc3RcbnggPSBtb2RlbC5tYXRyaXgoR3JhZC5SYXRlIH4gLiwgZGF0YSA9IENvbGxlZ2VfZGF0YSlbLCAtMV1cbnkgPSBDb2xsZWdlX2RhdGEkR3JhZC5SYXRlXG5cbnRyYWluID0gc2FtcGxlKDE6bnJvdyh4KSwgMC43Km5yb3coeCkpICMgNzAlIHRyYWluaW5nIGRhdGFcbnRlc3QgPSAoLXRyYWluKVxueS50ZXN0IDwtIHlbdGVzdF1cbmBgYCJ9 -->
-<pre class="r"><code>set.seed(5) 
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0LnNlZWQoMCkgXG5cbmFscGhhID0gMVxuayA9IDEwXG5sYW1iZGEgPSAxMF5zZXEoMTAsIC0yLCBsZW5ndGggPSAxMDApXG5cbiMgRGl2aWRlIHRoZSBkYXRhIGludG8gdHJhaW5pbmcgYW5kIHRlc3RcbnggPSBtb2RlbC5tYXRyaXgoR3JhZC5SYXRlIH4gLiwgZGF0YSA9IENvbGxlZ2VfZGF0YSlbLCAtMV1cbnkgPSBDb2xsZWdlX2RhdGEkR3JhZC5SYXRlXG5cbnRyYWluSW5kZXggPSBjcmVhdGVEYXRhUGFydGl0aW9uKENvbGxlZ2VfZGF0YSRHcmFkLlJhdGUsIHAgPSAwLjcsIGxpc3QgPSBGQUxTRSlcbnRyYWluaW5nID0gbmEub21pdChDb2xsZWdlX2RhdGFbdHJhaW5JbmRleCwgXSlcbnRlc3RpbmcgPSBuYS5vbWl0KENvbGxlZ2VfZGF0YVstdHJhaW5JbmRleCwgXSlcbmBgYCJ9 -->
+<pre class="r"><code>set.seed(0) 
 
 alpha = 1
 k = 10
@@ -1899,65 +1902,165 @@ lambda = 10^seq(10, -2, length = 100)
 x = model.matrix(Grad.Rate ~ ., data = College_data)[, -1]
 y = College_data$Grad.Rate
 
-train = sample(1:nrow(x), 0.7*nrow(x)) # 70% training data
-test = (-train)
-y.test &lt;- y[test]</code></pre>
+trainIndex = createDataPartition(College_data$Grad.Rate, p = 0.7, list = FALSE)
+training = na.omit(College_data[trainIndex, ])
+testing = na.omit(College_data[-trainIndex, ])</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<h1 style="font-size: 18px;">
+<strong>Linear Regression</strong>
+</h1>
 <p>Then using these two sets of data we can fit a linear regression
-model using k-folds and Lasso to predict the Graduation rate.</p>
+model using k-folds and Lasso to predict the Graduation rate. I will
+also fit a normal linear regression on the training data so we can infer
+the relationships between the predictors and response, and see how much
+the models performance improves using cross validation.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiMgRml0IG9uIHRyYWluaW5nIGRhdGFcbnNocmluay5tb2QgPC0gZ2xtbmV0KHhbdHJhaW4sXSwgeVt0cmFpbl0sIGFscGhhID0gYWxwaGEsIGxhbWJkYSA9IGxhbWJkYSwgZmFtaWx5PVwiZ2F1c3NpYW5cIilcblxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuIyBwcmVmb3JtIGNyb3NzIHZhbGlkYXRpb24gdG8gZ2V0IHRoZSBiZXN0IGxhbWJkYVxuXG5jdi5vdXQgPSBjdi5nbG1uZXQoeFt0cmFpbixdLCB5W3RyYWluXSwgYWxwaGE9YWxwaGEsIG5mb2xkcz1rLCBmYW1pbHk9XCJnYXVzc2lhblwiKVxuYmVzdGxhbSA9IGN2Lm91dCRsYW1iZGEubWluXG5cbiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4jIEdlbmVyYWxpemF0aW9uIEVycm9yXG5zaHJpbmsucHJlZCA8LSBwcmVkaWN0KHNocmluay5tb2QgLCBzID0gYmVzdGxhbSAsIG5ld3ggPSB4W3Rlc3QsIF0sIGZhbWlseT1cImdhdXNzaWFuXCIpXG5cbk1TRSA9ICBtZWFuKChzaHJpbmsucHJlZCAtIHkudGVzdCleMilcblxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gU3F1YXJlZCBlcnJvciBpcyAlZlwiLCBNU0UpKVxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiMgRml0IG9uIHRyYWluaW5nIGRhdGFcbmN2ID0gdHJhaW5Db250cm9sKG1ldGhvZCA9IFwiY3ZcIiwgbnVtYmVyID0gaylcbnNocmluay5tb2QgPSB0cmFpbihHcmFkLlJhdGUgfiAuLCBkYXRhID0gdHJhaW5pbmcsIG1ldGhvZCA9IFwiZ2xtbmV0XCIsIHRyQ29udHJvbCA9IGN2KVxuXG5sbS5maXQgPSBsbShHcmFkLlJhdGUgfiAuLCBkYXRhPUNvbGxlZ2VfZGF0YSlcblxuIyBnbG1uZXQgaXMgbGFzc29cbiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4jIEdlbmVyYWxpemF0aW9uIEVycm9yXG5cbnNocmluay5wcmVkID0gcHJlZGljdChzaHJpbmsubW9kLCB0ZXN0aW5nKVxuTVNFID0gIG1lYW4oKHRlc3RpbmckR3JhZC5SYXRlIC0gc2hyaW5rLnByZWQpXjIpXG5cbnNocmluay5wcmVkID0gcHJlZGljdChsbS5maXQsIHRlc3RpbmcpXG5NU0VsbSA9ICBtZWFuKCh0ZXN0aW5nJEdyYWQuUmF0ZSAtIHNocmluay5wcmVkKV4yKVxuXG5zdW1tYXJ5KGxtLmZpdClcbmBgYCJ9 -->
 <pre class="r"><code>#----------------------------------------------------------------
 # Fit on training data
-shrink.mod &lt;- glmnet(x[train,], y[train], alpha = alpha, lambda = lambda, family=&quot;gaussian&quot;)
+cv = trainControl(method = &quot;cv&quot;, number = k)
+shrink.mod = train(Grad.Rate ~ ., data = training, method = &quot;glmnet&quot;, trControl = cv)
 
-#------------------------------------------------
-# preform cross validation to get the best lambda
+lm.fit = lm(Grad.Rate ~ ., data=College_data)
 
-cv.out = cv.glmnet(x[train,], y[train], alpha=alpha, nfolds=k, family=&quot;gaussian&quot;)
-bestlam = cv.out$lambda.min
-
+# glmnet is lasso
 #----------------------------------------------
 # Generalization Error
-shrink.pred &lt;- predict(shrink.mod , s = bestlam , newx = x[test, ], family=&quot;gaussian&quot;)
 
-MSE =  mean((shrink.pred - y.test)^2)
+shrink.pred = predict(shrink.mod, testing)
+MSE =  mean((testing$Grad.Rate - shrink.pred)^2)
 
-message(sprintf(&quot;The Mean Squared error is %f&quot;, MSE))</code></pre>
+shrink.pred = predict(lm.fit, testing)
+MSElm =  mean((testing$Grad.Rate - shrink.pred)^2)
+
+summary(lm.fit)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gU3F1YXJlZCBlcnJvciBpcyAxNzcuNzA4Njc5XG4ifQ== -->
-<pre><code>The Mean Squared error is 177.708679</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiXG5DYWxsOlxubG0oZm9ybXVsYSA9IEdyYWQuUmF0ZSB+IC4sIGRhdGEgPSBDb2xsZWdlX2RhdGEpXG5cblJlc2lkdWFsczpcbiAgICBNaW4gICAgICAxUSAgTWVkaWFuICAgICAgM1EgICAgIE1heCBcbi01My44OTcgIC03LjEzMiAgLTAuMjkyICAgNy4yMTMgIDU0LjA1NiBcblxuQ29lZmZpY2llbnRzOlxuICAgICAgICAgICAgICBFc3RpbWF0ZSBTdGQuIEVycm9yIHQgdmFsdWUgUHIoPnx0fCkgICAgXG4oSW50ZXJjZXB0KSAzMC40OTIyOTU4ICA1LjYzNjk3MzEgICA1LjQwOSA4LjQ4ZS0wOCAqKipcblByaXZhdGUgICAgICAzLjM4MTM3NTggIDEuNjk2NTE0NyAgIDEuOTkzIDAuMDQ2NjA1ICogIFxuQXBwcyAgICAgICAgIDAuMDAxMjk4NCAgMC4wMDA0NDE4ICAgMi45MzkgMC4wMDMzOTAgKiogXG5BY2NlcHQgICAgICAtMC4wMDA2OTYxICAwLjAwMDg2MjcgIC0wLjgwNyAwLjQxOTk5NSAgICBcbkVucm9sbCAgICAgICAwLjAwMjE1OTMgIDAuMDAyMzA4MSAgIDAuOTM2IDAuMzQ5ODE0ICAgIFxuVG9wMTBwZXJjICAgIDAuMDU0ODk2NCAgMC4wNzE3NTg3ICAgMC43NjUgMC40NDQ1MDEgICAgXG5Ub3AyNXBlcmMgICAgMC4xMzUxMjg4ICAwLjA1NDk2NjcgICAyLjQ1OCAwLjAxNDE3OSAqICBcbkYuVW5kZXJncmFkIC0wLjAwMDQ3MTIgIDAuMDAwNDAwOCAgLTEuMTc2IDAuMjQwMTM4ICAgIFxuUC5VbmRlcmdyYWQgLTAuMDAxNDgzNiAgMC4wMDAzOTAyICAtMy44MDIgMC4wMDAxNTUgKioqXG5PdXRzdGF0ZSAgICAgMC4wMDEwMTc0ICAwLjAwMDIzMzQgICA0LjM1OSAxLjQ5ZS0wNSAqKipcblJvb20uQm9hcmQgICAwLjAwMTkxNDMgIDAuMDAwNTkwOCAgIDMuMjQwIDAuMDAxMjQ2ICoqIFxuQm9va3MgICAgICAgLTAuMDAyMjIwNSAgMC4wMDI5MTY4ICAtMC43NjEgMC40NDY3MzkgICAgXG5QZXJzb25hbCAgICAtMC4wMDE2NjM1ICAwLjAwMDc2OTggIC0yLjE2MSAwLjAzMTAwMCAqICBcblBoRCAgICAgICAgICAwLjA4NzI4MjcgIDAuMDU2ODEwMiAgIDEuNTM2IDAuMTI0ODU5ICAgIFxuVGVybWluYWwgICAgLTAuMDc0NzAyMyAgMC4wNjIzMTcyICAtMS4xOTkgMC4yMzEwMDIgICAgXG5TLkYuUmF0aW8gICAgMC4wNzU4MjIyICAwLjE1OTMxMDIgICAwLjQ3NiAwLjYzNDI1NCAgICBcbnBlcmMuYWx1bW5pICAwLjI3OTMzNDMgIDAuMDQ5MTc1MCAgIDUuNjgwIDEuOTFlLTA4ICoqKlxuRXhwZW5kICAgICAgLTAuMDAwNDU2NSAgMC4wMDAxNTQyICAtMi45NjEgMC4wMDMxNjMgKiogXG4tLS1cblNpZ25pZi4gY29kZXM6ICAwIOKAmCoqKuKAmSAwLjAwMSDigJgqKuKAmSAwLjAxIOKAmCrigJkgMC4wNSDigJgu4oCZIDAuMSDigJgg4oCZIDFcblxuUmVzaWR1YWwgc3RhbmRhcmQgZXJyb3I6IDEyLjc1IG9uIDc1OSBkZWdyZWVzIG9mIGZyZWVkb21cbk11bHRpcGxlIFItc3F1YXJlZDogIDAuNDYxNSxcdEFkanVzdGVkIFItc3F1YXJlZDogIDAuNDQ5NSBcbkYtc3RhdGlzdGljOiAzOC4yNyBvbiAxNyBhbmQgNzU5IERGLCAgcC12YWx1ZTogPCAyLjJlLTE2XG4ifQ== -->
+<pre><code>
+Call:
+lm(formula = Grad.Rate ~ ., data = College_data)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-53.897  -7.132  -0.292   7.213  54.056 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 30.4922958  5.6369731   5.409 8.48e-08 ***
+Private      3.3813758  1.6965147   1.993 0.046605 *  
+Apps         0.0012984  0.0004418   2.939 0.003390 ** 
+Accept      -0.0006961  0.0008627  -0.807 0.419995    
+Enroll       0.0021593  0.0023081   0.936 0.349814    
+Top10perc    0.0548964  0.0717587   0.765 0.444501    
+Top25perc    0.1351288  0.0549667   2.458 0.014179 *  
+F.Undergrad -0.0004712  0.0004008  -1.176 0.240138    
+P.Undergrad -0.0014836  0.0003902  -3.802 0.000155 ***
+Outstate     0.0010174  0.0002334   4.359 1.49e-05 ***
+Room.Board   0.0019143  0.0005908   3.240 0.001246 ** 
+Books       -0.0022205  0.0029168  -0.761 0.446739    
+Personal    -0.0016635  0.0007698  -2.161 0.031000 *  
+PhD          0.0872827  0.0568102   1.536 0.124859    
+Terminal    -0.0747023  0.0623172  -1.199 0.231002    
+S.F.Ratio    0.0758222  0.1593102   0.476 0.634254    
+perc.alumni  0.2793343  0.0491750   5.680 1.91e-08 ***
+Expend      -0.0004565  0.0001542  -2.961 0.003163 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 12.75 on 759 degrees of freedom
+Multiple R-squared:  0.4615,    Adjusted R-squared:  0.4495 
+F-statistic: 38.27 on 17 and 759 DF,  p-value: &lt; 2.2e-16</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgTGluZWFyIFJlZ3Jlc3Npb24gaXMgJWZcIiwgTVNFbG0pKVxuYGBgIn0= -->
+<pre class="r"><code>message(sprintf(&quot;The Mean squared error of the Linear Regression is %f&quot;, MSElm))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgTGluZWFyIFJlZ3Jlc3Npb24gaXMgMTc1LjYxMjA1M1xuIn0= -->
+<pre><code>The Mean squared error of the Linear Regression is 175.612053</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3Bsb3Qoc2hyaW5rLm1vZCRmaW5hbE1vZGVsLCB4dmFyID0gXCJsYW1iZGFcIiwgbGFiZWwgPSBUUlVFKVxuXG5zdW1tYXJ5KHNocmluay5tb2QkcmVzdWx0cylcbmBgYCJ9 -->
+<pre class="r"><code>#plot(shrink.mod$finalModel, xvar = &quot;lambda&quot;, label = TRUE)
+
+summary(shrink.mod$results)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICBhbHBoYSAgICAgICAgICBsYW1iZGEgICAgICAgICAgICAgUk1TRSAgICAgICAgICBSc3F1YXJlZCAgICAgICAgICAgTUFFICAgICAgICAgICAgIFJNU0VTRCAgICAgXG4gTWluLiAgIDowLjEwICAgTWluLiAgIDowLjAxOTkyICAgTWluLiAgIDoxMi41NSAgIE1pbi4gICA6MC40MTg0ICAgTWluLiAgIDogOS41NjIgICBNaW4uICAgOjEuMTk0ICBcbiAxc3QgUXUuOjAuMTAgICAxc3QgUXUuOjAuMDE5OTIgICAxc3QgUXUuOjEyLjU2ICAgMXN0IFF1LjowLjQ2MzUgICAxc3QgUXUuOiA5LjU3MSAgIDFzdCBRdS46MS4yMTQgIFxuIE1lZGlhbiA6MC41NSAgIE1lZGlhbiA6MC4xOTkxOSAgIE1lZGlhbiA6MTIuNjAgICBNZWRpYW4gOjAuNDY4MCAgIE1lZGlhbiA6IDkuNjM5ICAgTWVkaWFuIDoxLjIxOCAgXG4gTWVhbiAgIDowLjU1ICAgTWVhbiAgIDowLjczNzAyICAgTWVhbiAgIDoxMi43MiAgIE1lYW4gICA6MC40NjA1ICAgTWVhbiAgIDogOS43NjggICBNZWFuICAgOjEuMjI3ICBcbiAzcmQgUXUuOjEuMDAgICAzcmQgUXUuOjEuOTkxOTUgICAzcmQgUXUuOjEyLjY1ICAgM3JkIFF1LjowLjQ3MjcgICAzcmQgUXUuOiA5Ljc1MSAgIDNyZCBRdS46MS4yNDAgIFxuIE1heC4gICA6MS4wMCAgIE1heC4gICA6MS45OTE5NSAgIE1heC4gICA6MTMuMzYgICBNYXguICAgOjAuNDczMCAgIE1heC4gICA6MTAuNDc2ICAgTWF4LiAgIDoxLjI3NCAgXG4gICBSc3F1YXJlZFNEICAgICAgICAgIE1BRVNEICAgICAgIFxuIE1pbi4gICA6MC4wNzE4MiAgIE1pbi4gICA6MC44NzYyICBcbiAxc3QgUXUuOjAuMDgxNzAgICAxc3QgUXUuOjAuOTAzMCAgXG4gTWVkaWFuIDowLjA5MTg0ICAgTWVkaWFuIDowLjkzNTcgIFxuIE1lYW4gICA6MC4wODYzNiAgIE1lYW4gICA6MC45MzY4ICBcbiAzcmQgUXUuOjAuMDkyMDAgICAzcmQgUXUuOjAuOTcxNiAgXG4gTWF4LiAgIDowLjA5MjE4ICAgTWF4LiAgIDoxLjAwNTQgIFxuIn0= -->
+<pre><code>     alpha          lambda             RMSE          Rsquared           MAE             RMSESD     
+ Min.   :0.10   Min.   :0.01992   Min.   :12.55   Min.   :0.4184   Min.   : 9.562   Min.   :1.194  
+ 1st Qu.:0.10   1st Qu.:0.01992   1st Qu.:12.56   1st Qu.:0.4635   1st Qu.: 9.571   1st Qu.:1.214  
+ Median :0.55   Median :0.19919   Median :12.60   Median :0.4680   Median : 9.639   Median :1.218  
+ Mean   :0.55   Mean   :0.73702   Mean   :12.72   Mean   :0.4605   Mean   : 9.768   Mean   :1.227  
+ 3rd Qu.:1.00   3rd Qu.:1.99195   3rd Qu.:12.65   3rd Qu.:0.4727   3rd Qu.: 9.751   3rd Qu.:1.240  
+ Max.   :1.00   Max.   :1.99195   Max.   :13.36   Max.   :0.4730   Max.   :10.476   Max.   :1.274  
+   RsquaredSD          MAESD       
+ Min.   :0.07182   Min.   :0.8762  
+ 1st Qu.:0.08170   1st Qu.:0.9030  
+ Median :0.09184   Median :0.9357  
+ Mean   :0.08636   Mean   :0.9368  
+ 3rd Qu.:0.09200   3rd Qu.:0.9716  
+ Max.   :0.09218   Max.   :1.0054  </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgTGluZWFyIFJlZ3Jlc3Npb24gdXNpbmcgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gYW5kIExhc3NvIGlzICVmXCIsIE1TRSkpXG5gYGAifQ== -->
+<pre class="r"><code>message(sprintf(&quot;The Mean squared error of the Linear Regression using k-fold cross validation and Lasso is %f&quot;, MSE))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgTGluZWFyIFJlZ3Jlc3Npb24gdXNpbmcgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gYW5kIExhc3NvIGlzIDE5OC4wODU4NjVcbiJ9 -->
+<pre><code>The Mean squared error of the Linear Regression using k-fold cross validation and Lasso is 198.085865</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Now we do it with a decision tree with cross validation.</p>
+<p>For our cross validated lasso regression model from the statistics
+printed above we can see that that the optimal alpha is 0.55 suggesting
+we are applying moderate regularization with the optimal lambda for
+shrinkage being ~0.74 which shows that the models has many high
+coefficients. Then the RMSE and MAE being around 12.77 and ~9.84
+indicates that that the models predictions are off by around 12.77 or
+~9.84 units of percent which is not ideal since we are trying to have an
+accurate model that predicts the graduation rate more accurate than
+this. Also, the R^2 value conveys that the model explains can explain
+the variance around 45.57% of the time. Lastly, the MSE being ~181.16
+measuring the overall performance of the model on the test set is very
+high. In conclusion, we are better off trying a different model to try
+and predict the graduation rate.</p>
+<p>The normal Linear model on the other hand seems to yield a lower MSE
+on the test data despite not much going into it. The reasons for this
+could be that lasso can be more biased than the normal linear regression
+models if lambda is to large or the data has a lot of noise in it.
+However, it seems likely that it probably has to do with our lambda
+since it is large. However, a MSE of ~175.61 is not good enough either
+as it is still to large.</p>
+<p>From the stats printed from the normal linear regression model we can
+see that the predictors Private, Apps, Top25perc, P.Undergrad, Outstate,
+Room.Board, Personal, perc.alumni, and Expend have p-values low enough
+to provide evidence that these predictors have a relationship with the
+response variable.</p>
+<p>Wrapping up our fit with a linear regression model even though the
+high MSE is not desirable, we have more of a clue as to what predictors
+are corrlelated with the graduation rate.</p>
+<h1 style="font-size: 18px;">
+<strong>Decision Tree</strong>
+</h1>
+<p>To improve upon the MSE and get more insight into what predictors
+most influence our response we will fit a decision tree and another with
+LOOCV cross validation comparing the two. Note: the reason I switched to
+LOOCV from k-fold is that I got a resampling warning that was a side
+effect of k-fold which effected the validity of the model.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBUaGlzIHRpbWUgcGFydGl0aW9uIG91ciBkYXRhIHVzaW5nIGluZGV4aW5nXG50cmFpbkluZGV4IDwtIGNyZWF0ZURhdGFQYXJ0aXRpb24oQ29sbGVnZV9kYXRhJEdyYWQuUmF0ZSwgcCA9IDAuNywgbGlzdCA9IEZBTFNFKVxudHJhaW5pbmcgPC0gQ29sbGVnZV9kYXRhW3RyYWluSW5kZXgsIF1cbnRlc3RpbmcgPC0gQ29sbGVnZV9kYXRhWy10cmFpbkluZGV4LCBdXG5cbmxpYnJhcnkocnBhcnQpXG4jLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuIyBGaXQgYSBkZWNpc2lvbiB0cmVlIG9uIHRoZSB0cmFpbmluZyBkYXRhXG5maXQudHJlZSA9IHJwYXJ0KEdyYWQuUmF0ZSB+IC4sIGRhdGE9dHJhaW5pbmcpXG5cbiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiMgcHJlZm9ybSBjcm9zcyB2YWxpZGF0aW9uIHRvIGdldCB0aGUgYmVzdCBmaXRcblxuY3YgPSB0cmFpbkNvbnRyb2wobWV0aG9kID0gXCJjdlwiLCBudW1iZXIgPSAxMClcbmN2LmZpdCA9IHRyYWluKEdyYWQuUmF0ZSB+IC4sIGRhdGEgPSB0cmFpbmluZywgbWV0aG9kID0gXCJycGFydFwiLCB0ckNvbnRyb2wgPSBjdilcbmBgYCJ9 -->
-<pre class="r"><code># This time partition our data using indexing
-trainIndex &lt;- createDataPartition(College_data$Grad.Rate, p = 0.7, list = FALSE)
-training &lt;- College_data[trainIndex, ]
-testing &lt;- College_data[-trainIndex, ]
-
-library(rpart)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShycGFydClcbiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4jIEZpdCBhIGRlY2lzaW9uIHRyZWUgb24gdGhlIHRyYWluaW5nIGRhdGFcbmZpdC50cmVlID0gcnBhcnQoR3JhZC5SYXRlIH4gLiwgZGF0YT10cmFpbmluZylcblxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuIyBwcmVmb3JtIGNyb3NzIHZhbGlkYXRpb24gdG8gZ2V0IHRoZSBiZXN0IGZpdFxuIyBEZWZpbmUgdHVuaW5nIGdyaWRcbnR1bmVHcmlkID0gZXhwYW5kLmdyaWQoLmNwID0gc2VxKDAuMDEsIDAuNSwgMC4wMSkpXG5cbmN2ID0gdHJhaW5Db250cm9sKG1ldGhvZCA9IFwiTE9PQ1ZcIilcbmN2LmZpdCA9IHRyYWluKEdyYWQuUmF0ZSB+IC4sIGRhdGEgPSB0cmFpbmluZywgbWV0aG9kID0gXCJycGFydFwiLCB0ckNvbnRyb2wgPSBjdiwgdHVuZUdyaWQ9dHVuZUdyaWQpXG4jLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuIyBHZW5lcmFsaXphdGlvbiBlcnJvclxuXG5wcmVkID0gcHJlZGljdChmaXQudHJlZSwgdGVzdGluZylcbm1zZVRyZWUgPSBtZWFuKChwcmVkIC0gdGVzdGluZyRHcmFkLlJhdGUpXjIpXG5cbnByZWQgPSBwcmVkaWN0KGN2LmZpdCwgdGVzdGluZylcbm1zZUNyb3NzVHJlZSA9IG1lYW4oKHByZWQgLSB0ZXN0aW5nJEdyYWQuUmF0ZSleMilcblxubWVzc2FnZShcIk1ldHJpY3MgZm9yIGZvciB0aGUgZGVjaXNpb24gdHJlZSBmaXRcIilcbmBgYCJ9 -->
+<pre class="r"><code>library(rpart)
 #----------------------------------------------------------------
 # Fit a decision tree on the training data
 fit.tree = rpart(Grad.Rate ~ ., data=training)
 
 #------------------------------------------------
 # preform cross validation to get the best fit
+# Define tuning grid
+tuneGrid = expand.grid(.cp = seq(0.01, 0.5, 0.01))
 
-cv = trainControl(method = &quot;cv&quot;, number = 10)
-cv.fit = train(Grad.Rate ~ ., data = training, method = &quot;rpart&quot;, trControl = cv)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogVGhlcmUgd2VyZSBtaXNzaW5nIHZhbHVlcyBpbiByZXNhbXBsZWQgcGVyZm9ybWFuY2UgbWVhc3VyZXMuXG4ifQ== -->
-<pre><code>Warning: There were missing values in resampled performance measures.</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiMgR2VuZXJhbGl6YXRpb24gZXJyb3JcblxucHJlZCA9IHByZWRpY3QoZml0LnRyZWUsIHRlc3RpbmcpXG5tc2VUcmVlID0gbWVhbigocHJlZCAtIHRlc3RpbmckR3JhZC5SYXRlKV4yKVxuXG5wcmVkID0gcHJlZGljdChjdi5maXQsIHRlc3RpbmcpXG5tc2VDcm9zc1RyZWUgPSBtZWFuKChwcmVkIC0gdGVzdGluZyRHcmFkLlJhdGUpXjIpXG5cbnN1bW1hcnkoZml0LnRyZWUpXG5gYGAifQ== -->
-<pre class="r"><code>#----------------------------------------------
+cv = trainControl(method = &quot;LOOCV&quot;)
+cv.fit = train(Grad.Rate ~ ., data = training, method = &quot;rpart&quot;, trControl = cv, tuneGrid=tuneGrid)
+#----------------------------------------------
 # Generalization error
 
 pred = predict(fit.tree, testing)
@@ -1966,209 +2069,381 @@ mseTree = mean((pred - testing$Grad.Rate)^2)
 pred = predict(cv.fit, testing)
 mseCrossTree = mean((pred - testing$Grad.Rate)^2)
 
-summary(fit.tree)</code></pre>
+message(&quot;Metrics for for the decision tree fit&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiQ2FsbDpcbnJwYXJ0KGZvcm11bGEgPSBHcmFkLlJhdGUgfiAuLCBkYXRhID0gdHJhaW5pbmcpXG4gIG49IDU0NiBcblxuICAgICAgICAgICBDUCBuc3BsaXQgcmVsIGVycm9yICAgIHhlcnJvciAgICAgICB4c3RkXG4xICAwLjI1NDQyMDM5ICAgICAgMCAxLjAwMDAwMDAgMS4wMDMyODU5IDAuMDU2MDQ4ODFcbjIgIDAuMDU3MTkxNTUgICAgICAxIDAuNzQ1NTc5NiAwLjc2NjExMjcgMC4wNTE2MjE5OVxuMyAgMC4wMzk5Nzg3NiAgICAgIDIgMC42ODgzODgxIDAuNzUwNjg5OSAwLjA1MDk1MzI2XG40ICAwLjAzMDU5MzQ1ICAgICAgMyAwLjY0ODQwOTMgMC43MjU1MDE4IDAuMDUxNTAzMjZcbjUgIDAuMDI2MDIxNDQgICAgICA0IDAuNjE3ODE1OCAwLjcwMjkxOTkgMC4wNTE3NDcwNFxuNiAgMC4wMjI4ODg0OSAgICAgIDUgMC41OTE3OTQ0IDAuNjc5NTQyMiAwLjA1MTAxNjAwXG43ICAwLjAyMDA0NTk3ICAgICAgNiAwLjU2ODkwNTkgMC42NjY0NjE0IDAuMDUwNTY2NTZcbjggIDAuMDEwNjU0NTkgICAgICA3IDAuNTQ4ODU5OSAwLjY2MTM3MzcgMC4wNDgwNzc4MVxuOSAgMC4wMTA1NjUzOSAgICAgIDggMC41MzgyMDU0IDAuNjg5Mjg3NCAwLjA1MDg5MzgzXG4xMCAwLjAxMDAwMDAwICAgICAgOSAwLjUyNzY0MDAgMC42OTMwODA0IDAuMDUxMTAyOTBcblxuVmFyaWFibGUgaW1wb3J0YW5jZVxuICAgT3V0c3RhdGUgcGVyYy5hbHVtbmkgICAgICBFeHBlbmQgIFJvb20uQm9hcmQgICBTLkYuUmF0aW8gICAgIFByaXZhdGUgICBUb3AxMHBlcmMgICBUb3AyNXBlcmMgICAgICAgIEFwcHMgXG4gICAgICAgICAyMiAgICAgICAgICAxNCAgICAgICAgICAxMiAgICAgICAgICAxMCAgICAgICAgICAgOSAgICAgICAgICAgOSAgICAgICAgICAgNiAgICAgICAgICAgNCAgICAgICAgICAgMyBcbiAgICAgQWNjZXB0ICAgICAgRW5yb2xsICAgICAgICAgUGhEIEYuVW5kZXJncmFkICAgICAgIEJvb2tzICAgIFBlcnNvbmFsIFAuVW5kZXJncmFkICAgIFRlcm1pbmFsIFxuICAgICAgICAgIDIgICAgICAgICAgIDIgICAgICAgICAgIDIgICAgICAgICAgIDIgICAgICAgICAgIDEgICAgICAgICAgIDEgICAgICAgICAgIDEgICAgICAgICAgIDEgXG5cbk5vZGUgbnVtYmVyIDE6IDU0NiBvYnNlcnZhdGlvbnMsICAgIGNvbXBsZXhpdHkgcGFyYW09MC4yNTQ0MjA0XG4gIG1lYW49NjUuNTY0MSwgTVNFPTI5My4wMzM0IFxuICBsZWZ0IHNvbj0yICgyNTkgb2JzKSByaWdodCBzb249MyAoMjg3IG9icylcbiAgUHJpbWFyeSBzcGxpdHM6XG4gICAgICBPdXRzdGF0ZSAgICA8IDk2MzUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMjU0NDIwNCwgKDAgbWlzc2luZylcbiAgICAgIHBlcmMuYWx1bW5pIDwgMTguNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4yMDU1NDgwLCAoMCBtaXNzaW5nKVxuICAgICAgVG9wMTBwZXJjICAgPCAyNS41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjE1NTI1NTksICgwIG1pc3NpbmcpXG4gICAgICBUb3AyNXBlcmMgICA8IDQ4LjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTQxNzA0OSwgKDAgbWlzc2luZylcbiAgICAgIFJvb20uQm9hcmQgIDwgMzc4NSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xMzY1NjAxLCAoMCBtaXNzaW5nKVxuICBTdXJyb2dhdGUgc3BsaXRzOlxuICAgICAgRXhwZW5kICAgICAgPCA3OTM4ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC43OTEsIGFkaj0wLjU2MCwgKDAgc3BsaXQpXG4gICAgICBSb29tLkJvYXJkICA8IDM5NTEgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjc1OCwgYWRqPTAuNDkwLCAoMCBzcGxpdClcbiAgICAgIFByaXZhdGUgICAgIDwgMS41ICAgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNzQ0LCBhZGo9MC40NTksICgwIHNwbGl0KVxuICAgICAgUy5GLlJhdGlvICAgPCAxNS4wNSAgIHRvIHRoZSByaWdodCwgYWdyZWU9MC43MjcsIGFkaj0wLjQyNSwgKDAgc3BsaXQpXG4gICAgICBwZXJjLmFsdW1uaSA8IDE4LjUgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjcxNiwgYWRqPTAuNDAyLCAoMCBzcGxpdClcblxuTm9kZSBudW1iZXIgMjogMjU5IG9ic2VydmF0aW9ucywgICAgY29tcGxleGl0eSBwYXJhbT0wLjAzMDU5MzQ1XG4gIG1lYW49NTYuNDc0OSwgTVNFPTI0NC4xMTgxIFxuICBsZWZ0IHNvbj00ICgxNDcgb2JzKSByaWdodCBzb249NSAoMTEyIG9icylcbiAgUHJpbWFyeSBzcGxpdHM6XG4gICAgICBwZXJjLmFsdW1uaSA8IDE2LjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDc3NDE3MzksICgwIG1pc3NpbmcpXG4gICAgICBUb3AxMHBlcmMgICA8IDMwLjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDY2Mjc3NDQsICgwIG1pc3NpbmcpXG4gICAgICBUb3AyNXBlcmMgICA8IDQ3LjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDU4MzY1OTAsICgwIG1pc3NpbmcpXG4gICAgICBPdXRzdGF0ZSAgICA8IDc3OTkuNSAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDQzMTY4MDEsICgwIG1pc3NpbmcpXG4gICAgICBQLlVuZGVyZ3JhZCA8IDM3MzQuNSAgdG8gdGhlIHJpZ2h0LCBpbXByb3ZlPTAuMDM5MDYyNTAsICgwIG1pc3NpbmcpXG4gIFN1cnJvZ2F0ZSBzcGxpdHM6XG4gICAgICBPdXRzdGF0ZSAgICA8IDc4MzIgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjY3MiwgYWRqPTAuMjQxLCAoMCBzcGxpdClcbiAgICAgIFRvcDEwcGVyYyAgIDwgMjkuNSAgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNjMzLCBhZGo9MC4xNTIsICgwIHNwbGl0KVxuICAgICAgUC5VbmRlcmdyYWQgPCAxMTguNSAgIHRvIHRoZSByaWdodCwgYWdyZWU9MC42MTgsIGFkaj0wLjExNiwgKDAgc3BsaXQpXG4gICAgICBTLkYuUmF0aW8gICA8IDExLjY1ICAgdG8gdGhlIHJpZ2h0LCBhZ3JlZT0wLjYxOCwgYWRqPTAuMTE2LCAoMCBzcGxpdClcbiAgICAgIFBlcnNvbmFsICAgIDwgMTQ1Ni41ICB0byB0aGUgcmlnaHQsIGFncmVlPTAuNjE0LCBhZGo9MC4xMDcsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciAzOiAyODcgb2JzZXJ2YXRpb25zLCAgICBjb21wbGV4aXR5IHBhcmFtPTAuMDU3MTkxNTVcbiAgbWVhbj03My43NjY1NSwgTVNFPTE5NS4zNDI3IFxuICBsZWZ0IHNvbj02ICgyNjUgb2JzKSByaWdodCBzb249NyAoMjIgb2JzKVxuICBQcmltYXJ5IHNwbGl0czpcbiAgICAgIFRvcDEwcGVyYyAgIDwgNjcuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xNjMyMTU5LCAoMCBtaXNzaW5nKVxuICAgICAgcGVyYy5hbHVtbmkgPCAyNi41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjE1ODY0MTEsICgwIG1pc3NpbmcpXG4gICAgICBPdXRzdGF0ZSAgICA8IDE3NTQwICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTQ5Mjk1NCwgKDAgbWlzc2luZylcbiAgICAgIFRvcDI1cGVyYyAgIDwgODMuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xNDcxNTc4LCAoMCBtaXNzaW5nKVxuICAgICAgQXBwcyAgICAgICAgPCAxNzYzICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjExODEwNDUsICgwIG1pc3NpbmcpXG4gIFN1cnJvZ2F0ZSBzcGxpdHM6XG4gICAgICBUb3AyNXBlcmMgICA8IDkxLjUgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjk3OSwgYWRqPTAuNzI3LCAoMCBzcGxpdClcbiAgICAgIEV4cGVuZCAgICAgIDwgMTkyOTQgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuOTUxLCBhZGo9MC4zNjQsICgwIHNwbGl0KVxuICAgICAgUGhEICAgICAgICAgPCA5NS41ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC45NDgsIGFkaj0wLjMxOCwgKDAgc3BsaXQpXG4gICAgICBwZXJjLmFsdW1uaSA8IDQ4LjUgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjkzNywgYWRqPTAuMTgyLCAoMCBzcGxpdClcbiAgICAgIFMuRi5SYXRpbyAgIDwgNiAgICAgICB0byB0aGUgcmlnaHQsIGFncmVlPTAuOTM0LCBhZGo9MC4xMzYsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciA0OiAxNDcgb2JzZXJ2YXRpb25zLCAgICBjb21wbGV4aXR5IHBhcmFtPTAuMDEwNjU0NTlcbiAgbWVhbj01Mi42ODAyNywgTVNFPTIzMi42MjU3IFxuICBsZWZ0IHNvbj04ICgxMzkgb2JzKSByaWdodCBzb249OSAoOCBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgQm9va3MgICAgIDwgMjc1ICAgICB0byB0aGUgcmlnaHQsIGltcHJvdmU9MC4wNDk4NTA3NSwgKDAgbWlzc2luZylcbiAgICAgIEVucm9sbCAgICA8IDM1My41ICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDQ2NzI3NTYsICgwIG1pc3NpbmcpXG4gICAgICBTLkYuUmF0aW8gPCAxMS45NSAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA0MzEwODQ1LCAoMCBtaXNzaW5nKVxuICAgICAgVG9wMTBwZXJjIDwgNDAuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wNDMwNzQzMiwgKDAgbWlzc2luZylcbiAgICAgIFRvcDI1cGVyYyA8IDQ0LjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDM5NTEwNTksICgwIG1pc3NpbmcpXG5cbk5vZGUgbnVtYmVyIDU6IDExMiBvYnNlcnZhdGlvbnMsICAgIGNvbXBsZXhpdHkgcGFyYW09MC4wMjI4ODg0OVxuICBtZWFuPTYxLjQ1NTM2LCBNU0U9MjE1LjQ5OCBcbiAgbGVmdCBzb249MTAgKDkgb2JzKSByaWdodCBzb249MTEgKDEwMyBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgT3V0c3RhdGUgICAgPCA0OTgxLjUgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjE1MTcyODAwLCAoMCBtaXNzaW5nKVxuICAgICAgUm9vbS5Cb2FyZCAgPCA0Njg0LjUgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA4NTQwMDUyLCAoMCBtaXNzaW5nKVxuICAgICAgRi5VbmRlcmdyYWQgPCA5NjAgICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA3MDAxNzcyLCAoMCBtaXNzaW5nKVxuICAgICAgUGVyc29uYWwgICAgPCA3NDEgICAgIHRvIHRoZSByaWdodCwgaW1wcm92ZT0wLjA2NDIxMzA4LCAoMCBtaXNzaW5nKVxuICAgICAgVG9wMjVwZXJjICAgPCA2MS41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA2Mjg1NjMxLCAoMCBtaXNzaW5nKVxuICBTdXJyb2dhdGUgc3BsaXRzOlxuICAgICAgUm9vbS5Cb2FyZCA8IDI3NTYgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjk1NSwgYWRqPTAuNDQ0LCAoMCBzcGxpdClcbiAgICAgIFRlcm1pbmFsICAgPCA5OC41ICAgIHRvIHRoZSByaWdodCwgYWdyZWU9MC45MjksIGFkaj0wLjExMSwgKDAgc3BsaXQpXG5cbk5vZGUgbnVtYmVyIDY6IDI2NSBvYnNlcnZhdGlvbnMsICAgIGNvbXBsZXhpdHkgcGFyYW09MC4wMzk5Nzg3NlxuICBtZWFuPTcyLjEzOTYyLCBNU0U9MTcyLjg3NDggXG4gIGxlZnQgc29uPTEyICg5OSBvYnMpIHJpZ2h0IHNvbj0xMyAoMTY2IG9icylcbiAgUHJpbWFyeSBzcGxpdHM6XG4gICAgICBwZXJjLmFsdW1uaSA8IDIyLjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTM5NjI0NDAsICgwIG1pc3NpbmcpXG4gICAgICBUb3AyNXBlcmMgICA8IDUwLjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTEwMjU1OTAsICgwIG1pc3NpbmcpXG4gICAgICBUb3AxMHBlcmMgICA8IDE4LjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDk3MzUyMTIsICgwIG1pc3NpbmcpXG4gICAgICBBcHBzICAgICAgICA8IDEyODQuNSAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDc1NTczNTYsICgwIG1pc3NpbmcpXG4gICAgICBBY2NlcHQgICAgICA8IDEwNzEuNSAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDY5ODkyOTgsICgwIG1pc3NpbmcpXG4gIFN1cnJvZ2F0ZSBzcGxpdHM6XG4gICAgICBGLlVuZGVyZ3JhZCA8IDM1NTcuNSAgdG8gdGhlIHJpZ2h0LCBhZ3JlZT0wLjcwNiwgYWRqPTAuMjEyLCAoMCBzcGxpdClcbiAgICAgIFAuVW5kZXJncmFkIDwgOTc1ICAgICB0byB0aGUgcmlnaHQsIGFncmVlPTAuNzA2LCBhZGo9MC4yMTIsICgwIHNwbGl0KVxuICAgICAgQWNjZXB0ICAgICAgPCAyNzczICAgIHRvIHRoZSByaWdodCwgYWdyZWU9MC42OTEsIGFkaj0wLjE3MiwgKDAgc3BsaXQpXG4gICAgICBFbnJvbGwgICAgICA8IDg2NSAgICAgdG8gdGhlIHJpZ2h0LCBhZ3JlZT0wLjY5MSwgYWRqPTAuMTcyLCAoMCBzcGxpdClcbiAgICAgIEFwcHMgICAgICAgIDwgMzczOS41ICB0byB0aGUgcmlnaHQsIGFncmVlPTAuNjc1LCBhZGo9MC4xMzEsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciA3OiAyMiBvYnNlcnZhdGlvbnNcbiAgbWVhbj05My4zNjM2NCwgTVNFPTUwLjA0OTU5IFxuXG5Ob2RlIG51bWJlciA4OiAxMzkgb2JzZXJ2YXRpb25zXG4gIG1lYW49NTEuODYzMzEsIE1TRT0yMTQuNjUwNCBcblxuTm9kZSBudW1iZXIgOTogOCBvYnNlcnZhdGlvbnNcbiAgbWVhbj02Ni44NzUsIE1TRT0zMzEuODU5NCBcblxuTm9kZSBudW1iZXIgMTA6IDkgb2JzZXJ2YXRpb25zXG4gIG1lYW49NDIuMTExMTEsIE1TRT0xMDcuODc2NSBcblxuTm9kZSBudW1iZXIgMTE6IDEwMyBvYnNlcnZhdGlvbnMsICAgIGNvbXBsZXhpdHkgcGFyYW09MC4wMTA1NjUzOVxuICBtZWFuPTYzLjE0NTYzLCBNU0U9MTg5LjM0NzcgXG4gIGxlZnQgc29uPTIyICg5MyBvYnMpIHJpZ2h0IHNvbj0yMyAoMTAgb2JzKVxuICBQcmltYXJ5IHNwbGl0czpcbiAgICAgIFBlcnNvbmFsICAgIDwgNzQxICAgICB0byB0aGUgcmlnaHQsIGltcHJvdmU9MC4wODY2NzU4NSwgKDAgbWlzc2luZylcbiAgICAgIEYuVW5kZXJncmFkIDwgOTA5LjUgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wODE1NDQwNiwgKDAgbWlzc2luZylcbiAgICAgIEFjY2VwdCAgICAgIDwgNjk0ICAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wODA5MDk5OCwgKDAgbWlzc2luZylcbiAgICAgIFJvb20uQm9hcmQgIDwgNDY4NC41ICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wODA3NTgxOSwgKDAgbWlzc2luZylcbiAgICAgIEVucm9sbCAgICAgIDwgMjY2ICAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wNzkyNjA2NywgKDAgbWlzc2luZylcbiAgU3Vycm9nYXRlIHNwbGl0czpcbiAgICAgIFRvcDEwcGVyYyA8IDU1ICAgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjkyMiwgYWRqPTAuMiwgKDAgc3BsaXQpXG4gICAgICBUb3AyNXBlcmMgPCA4Ny41ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC45MjIsIGFkaj0wLjIsICgwIHNwbGl0KVxuICAgICAgRXhwZW5kICAgIDwgMzcwOS41ICB0byB0aGUgcmlnaHQsIGFncmVlPTAuOTIyLCBhZGo9MC4yLCAoMCBzcGxpdClcblxuTm9kZSBudW1iZXIgMTI6IDk5IG9ic2VydmF0aW9ucywgICAgY29tcGxleGl0eSBwYXJhbT0wLjAyMDA0NTk3XG4gIG1lYW49NjUuNzc3NzgsIE1TRT0xODMuNzY4OCBcbiAgbGVmdCBzb249MjQgKDM5IG9icykgcmlnaHQgc29uPTI1ICg2MCBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgVG9wMTBwZXJjIDwgMjEuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xNzYyOTA5MCwgKDAgbWlzc2luZylcbiAgICAgIFRvcDI1cGVyYyA8IDUwLjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTM1NTE2NTAsICgwIG1pc3NpbmcpXG4gICAgICBTLkYuUmF0aW8gPCA5LjkgICAgIHRvIHRoZSByaWdodCwgaW1wcm92ZT0wLjA1ODk4NzE5LCAoMCBtaXNzaW5nKVxuICAgICAgUGVyc29uYWwgIDwgNzE1ICAgICB0byB0aGUgcmlnaHQsIGltcHJvdmU9MC4wNTY3MTU4OCwgKDAgbWlzc2luZylcbiAgICAgIFBoRCAgICAgICA8IDgxLjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDU0MjM0MDksICgwIG1pc3NpbmcpXG4gIFN1cnJvZ2F0ZSBzcGxpdHM6XG4gICAgICBUb3AyNXBlcmMgPCA0NS41ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC45MTksIGFkaj0wLjc5NSwgKDAgc3BsaXQpXG4gICAgICBQaEQgICAgICAgPCA3MS41ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC43NzgsIGFkaj0wLjQzNiwgKDAgc3BsaXQpXG4gICAgICBBcHBzICAgICAgPCA4OTggICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC43MDcsIGFkaj0wLjI1NiwgKDAgc3BsaXQpXG4gICAgICBUZXJtaW5hbCAgPCA3Ny41ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC43MDcsIGFkaj0wLjI1NiwgKDAgc3BsaXQpXG4gICAgICBFbnJvbGwgICAgPCAyMTguNSAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC42OTcsIGFkaj0wLjIzMSwgKDAgc3BsaXQpXG5cbk5vZGUgbnVtYmVyIDEzOiAxNjYgb2JzZXJ2YXRpb25zLCAgICBjb21wbGV4aXR5IHBhcmFtPTAuMDI2MDIxNDRcbiAgbWVhbj03NS45MzM3MywgTVNFPTEyNy44NDUgXG4gIGxlZnQgc29uPTI2ICgxMDcgb2JzKSByaWdodCBzb249MjcgKDU5IG9icylcbiAgUHJpbWFyeSBzcGxpdHM6XG4gICAgICBBcHBzICAgICAgICA8IDE3NjIgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTk2MTc3NjAsICgwIG1pc3NpbmcpXG4gICAgICBFbnJvbGwgICAgICA8IDQwNC41ICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTgyNTAyNzAsICgwIG1pc3NpbmcpXG4gICAgICBBY2NlcHQgICAgICA8IDE1MDYgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTYwNDYwNDAsICgwIG1pc3NpbmcpXG4gICAgICBGLlVuZGVyZ3JhZCA8IDE2MjEuNSAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTYwMDgwODAsICgwIG1pc3NpbmcpXG4gICAgICBUb3AyNXBlcmMgICA8IDU0LjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDczMjI0NjMsICgwIG1pc3NpbmcpXG4gIFN1cnJvZ2F0ZSBzcGxpdHM6XG4gICAgICBBY2NlcHQgICAgICA8IDE1MDYgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjk2NCwgYWRqPTAuODk4LCAoMCBzcGxpdClcbiAgICAgIEVucm9sbCAgICAgIDwgNDYwICAgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuODg2LCBhZGo9MC42NzgsICgwIHNwbGl0KVxuICAgICAgRi5VbmRlcmdyYWQgPCAxNjk4ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC44NjcsIGFkaj0wLjYyNywgKDAgc3BsaXQpXG4gICAgICBPdXRzdGF0ZSAgICA8IDE1ODE1LjUgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjc5NSwgYWRqPTAuNDI0LCAoMCBzcGxpdClcbiAgICAgIEJvb2tzICAgICAgIDwgNjMyICAgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNzE3LCBhZGo9MC4yMDMsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciAyMjogOTMgb2JzZXJ2YXRpb25zXG4gIG1lYW49NjEuODE3MiwgTVNFPTE0My4yMDMxIFxuXG5Ob2RlIG51bWJlciAyMzogMTAgb2JzZXJ2YXRpb25zXG4gIG1lYW49NzUuNSwgTVNFPTQ0OS40NSBcblxuTm9kZSBudW1iZXIgMjQ6IDM5IG9ic2VydmF0aW9uc1xuICBtZWFuPTU4LjcxNzk1LCBNU0U9MTMyLjcxNTMgXG5cbk5vZGUgbnVtYmVyIDI1OiA2MCBvYnNlcnZhdGlvbnNcbiAgbWVhbj03MC4zNjY2NywgTVNFPTE2My40OTg5IFxuXG5Ob2RlIG51bWJlciAyNjogMTA3IG9ic2VydmF0aW9uc1xuICBtZWFuPTcyLjIxNDk1LCBNU0U9MTIxLjMwODkgXG5cbk5vZGUgbnVtYmVyIDI3OiA1OSBvYnNlcnZhdGlvbnNcbiAgbWVhbj04Mi42Nzc5NywgTVNFPTY5LjEzMzU4IFxuIn0= -->
+<!-- rnb-output-begin eyJkYXRhIjoiTWV0cmljcyBmb3IgZm9yIHRoZSBkZWNpc2lvbiB0cmVlIGZpdFxuIn0= -->
+<pre><code>Metrics for for the decision tree fit</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShmaXQudHJlZSlcbmBgYCJ9 -->
+<pre class="r"><code>summary(fit.tree)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ2FsbDpcbnJwYXJ0KGZvcm11bGEgPSBHcmFkLlJhdGUgfiAuLCBkYXRhID0gdHJhaW5pbmcpXG4gIG49IDU0NiBcblxuICAgICAgICAgICBDUCBuc3BsaXQgcmVsIGVycm9yICAgIHhlcnJvciAgICAgICB4c3RkXG4xICAwLjI5MzI2MTMxICAgICAgMCAxLjAwMDAwMDAgMS4wMDc0ODQ1IDAuMDU0NDEzNTVcbjIgIDAuMDQ4MzMzNDMgICAgICAxIDAuNzA2NzM4NyAwLjcyMTg4MTEgMC4wNDY0NzQ2NlxuMyAgMC4wNDA2NzQ4NCAgICAgIDIgMC42NTg0MDUzIDAuNzIwNzkyMCAwLjA0NjI1MDgxXG40ICAwLjAzMDQ0MjgxICAgICAgMyAwLjYxNzczMDQgMC42OTY2MzU0IDAuMDQ0Nzk4NTBcbjUgIDAuMDIyODkyOTAgICAgICA0IDAuNTg3Mjg3NiAwLjY2NjcwMTQgMC4wNDQyNDM5OVxuNiAgMC4wMTk1OTQ5NCAgICAgIDUgMC41NjQzOTQ3IDAuNjY1NjQ0MCAwLjA0NDA5MzQyXG43ICAwLjAxODY0MTA3ICAgICAgNiAwLjU0NDc5OTggMC42NjAxMzc4IDAuMDQ0MTI3NjJcbjggIDAuMDE1OTU0NDEgICAgICA3IDAuNTI2MTU4NyAwLjY0NjI2MDUgMC4wNDMzOTM0NFxuOSAgMC4wMTI5MDAwNiAgICAgIDggMC41MTAyMDQzIDAuNjQ0MTI4MyAwLjA0Mzg5NjI0XG4xMCAwLjAxMDg0MzQ3ICAgICAgOSAwLjQ5NzMwNDIgMC42NjAyNjM2IDAuMDQ1MjE4MDJcbjExIDAuMDEwMDAwMDAgICAgIDEwIDAuNDg2NDYwNyAwLjY3Mzk0OTUgMC4wNDY5ODAyNVxuXG5WYXJpYWJsZSBpbXBvcnRhbmNlXG4gICBPdXRzdGF0ZSAgICAgIEV4cGVuZCAgIFRvcDEwcGVyYyBwZXJjLmFsdW1uaSAgUm9vbS5Cb2FyZCAgIFMuRi5SYXRpbyAgICAgICAgQXBwcyAgICAgIEFjY2VwdCAgIFRvcDI1cGVyYyBcbiAgICAgICAgIDIxICAgICAgICAgIDEyICAgICAgICAgIDExICAgICAgICAgIDExICAgICAgICAgICA5ICAgICAgICAgICA4ICAgICAgICAgICA1ICAgICAgICAgICA1ICAgICAgICAgICA0IFxuICAgICBFbnJvbGwgRi5VbmRlcmdyYWQgICAgICAgICBQaEQgUC5VbmRlcmdyYWQgICAgVGVybWluYWwgICAgIFByaXZhdGUgXG4gICAgICAgICAgNCAgICAgICAgICAgNCAgICAgICAgICAgMiAgICAgICAgICAgMSAgICAgICAgICAgMSAgICAgICAgICAgMSBcblxuTm9kZSBudW1iZXIgMTogNTQ2IG9ic2VydmF0aW9ucywgICAgY29tcGxleGl0eSBwYXJhbT0wLjI5MzI2MTNcbiAgbWVhbj02NS41NjU5MywgTVNFPTI5NS42MTU2IFxuICBsZWZ0IHNvbj0yICgzMDMgb2JzKSByaWdodCBzb249MyAoMjQzIG9icylcbiAgUHJpbWFyeSBzcGxpdHM6XG4gICAgICBPdXRzdGF0ZSAgICA8IDEwNTcyLjUgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMjkzMjYxMywgKDAgbWlzc2luZylcbiAgICAgIHBlcmMuYWx1bW5pIDwgMTguNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xOTI3NDE4LCAoMCBtaXNzaW5nKVxuICAgICAgVG9wMjVwZXJjICAgPCA1MS41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjE4NjQ0NDksICgwIG1pc3NpbmcpXG4gICAgICBUb3AxMHBlcmMgICA8IDI1LjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTczNTMzNCwgKDAgbWlzc2luZylcbiAgICAgIFJvb20uQm9hcmQgIDwgNDI4MCAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xNjM3NTU1LCAoMCBtaXNzaW5nKVxuICBTdXJyb2dhdGUgc3BsaXRzOlxuICAgICAgRXhwZW5kICAgICAgPCA4NTE5ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC44MTEsIGFkaj0wLjU3NiwgKDAgc3BsaXQpXG4gICAgICBSb29tLkJvYXJkICA8IDQyNDUgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjc2NywgYWRqPTAuNDc3LCAoMCBzcGxpdClcbiAgICAgIFMuRi5SYXRpbyAgIDwgMTMuNjUgICB0byB0aGUgcmlnaHQsIGFncmVlPTAuNzIyLCBhZGo9MC4zNzQsICgwIHNwbGl0KVxuICAgICAgcGVyYy5hbHVtbmkgPCAyMC41ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC43MTgsIGFkaj0wLjM2NiwgKDAgc3BsaXQpXG4gICAgICBUb3AxMHBlcmMgICA8IDI2LjUgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjcxNCwgYWRqPTAuMzU4LCAoMCBzcGxpdClcblxuTm9kZSBudW1iZXIgMjogMzAzIG9ic2VydmF0aW9ucywgICAgY29tcGxleGl0eSBwYXJhbT0wLjA0MDY3NDg0XG4gIG1lYW49NTcuMjI3NzIsIE1TRT0yMjUuODE5NCBcbiAgbGVmdCBzb249NCAoMTI3IG9icykgcmlnaHQgc29uPTUgKDE3NiBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgVG9wMjVwZXJjICAgPCA0NC41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA5NTk0OTMzLCAoMCBtaXNzaW5nKVxuICAgICAgcGVyYy5hbHVtbmkgPCAxNi41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA5MDgyMDk3LCAoMCBtaXNzaW5nKVxuICAgICAgVG9wMTBwZXJjICAgPCAzNC41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA1MTQyMTE3LCAoMCBtaXNzaW5nKVxuICAgICAgQXBwcyAgICAgICAgPCAxMDg2NC41IHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA0NzkzMTgzLCAoMCBtaXNzaW5nKVxuICAgICAgT3V0c3RhdGUgICAgPCA3MzkyICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA0Nzc5MDMwLCAoMCBtaXNzaW5nKVxuICBTdXJyb2dhdGUgc3BsaXRzOlxuICAgICAgVG9wMTBwZXJjIDwgMTcuNSAgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuODYxLCBhZGo9MC42NjksICgwIHNwbGl0KVxuICAgICAgQWNjZXB0ICAgIDwgNjg3LjUgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNjUwLCBhZGo9MC4xNjUsICgwIHNwbGl0KVxuICAgICAgUGhEICAgICAgIDwgNDguNSAgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNjUwLCBhZGo9MC4xNjUsICgwIHNwbGl0KVxuICAgICAgRXhwZW5kICAgIDwgNTExMC41ICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNjQwLCBhZGo9MC4xNDIsICgwIHNwbGl0KVxuICAgICAgQXBwcyAgICAgIDwgODg4LjUgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNjM3LCBhZGo9MC4xMzQsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciAzOiAyNDMgb2JzZXJ2YXRpb25zLCAgICBjb21wbGV4aXR5IHBhcmFtPTAuMDQ4MzMzNDNcbiAgbWVhbj03NS45NjI5NiwgTVNFPTE4Ny44NTQ2IFxuICBsZWZ0IHNvbj02ICg4OCBvYnMpIHJpZ2h0IHNvbj03ICgxNTUgb2JzKVxuICBQcmltYXJ5IHNwbGl0czpcbiAgICAgIEFwcHMgICAgICAgIDwgMTI5NS41ICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xNzA4OTkwLCAoMCBtaXNzaW5nKVxuICAgICAgVG9wMTBwZXJjICAgPCAxNy41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjE2NDA4MTgsICgwIG1pc3NpbmcpXG4gICAgICBUb3AyNXBlcmMgICA8IDUwLjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTU5MTk3NiwgKDAgbWlzc2luZylcbiAgICAgIHBlcmMuYWx1bW5pIDwgMjIuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xNDI4MjU1LCAoMCBtaXNzaW5nKVxuICAgICAgRW5yb2xsICAgICAgPCAzMDIuNSAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjEzNjM5MjQsICgwIG1pc3NpbmcpXG4gIFN1cnJvZ2F0ZSBzcGxpdHM6XG4gICAgICBBY2NlcHQgICAgICA8IDk1Ny41ICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjk1MSwgYWRqPTAuODY0LCAoMCBzcGxpdClcbiAgICAgIEVucm9sbCAgICAgIDwgMzA0LjUgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuODkzLCBhZGo9MC43MDUsICgwIHNwbGl0KVxuICAgICAgRi5VbmRlcmdyYWQgPCAxNDM3LjUgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC44NjQsIGFkaj0wLjYyNSwgKDAgc3BsaXQpXG4gICAgICBQaEQgICAgICAgICA8IDc3LjUgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjc0NSwgYWRqPTAuMjk1LCAoMCBzcGxpdClcbiAgICAgIFRlcm1pbmFsICAgIDwgODAuNSAgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNzIwLCBhZGo9MC4yMjcsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciA0OiAxMjcgb2JzZXJ2YXRpb25zLCAgICBjb21wbGV4aXR5IHBhcmFtPTAuMDE1OTU0NDFcbiAgbWVhbj01MS43NDgwMywgTVNFPTIyNy4xOTY0IFxuICBsZWZ0IHNvbj04ICg1MCBvYnMpIHJpZ2h0IHNvbj05ICg3NyBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgT3V0c3RhdGUgICAgPCA2ODgxLjUgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA4OTI0NzQxLCAoMCBtaXNzaW5nKVxuICAgICAgUGVyc29uYWwgICAgPCAxNDA2LjUgIHRvIHRoZSByaWdodCwgaW1wcm92ZT0wLjA3ODY2NjA0LCAoMCBtaXNzaW5nKVxuICAgICAgUC5VbmRlcmdyYWQgPCAyMzY5LjUgIHRvIHRoZSByaWdodCwgaW1wcm92ZT0wLjA3NDc3MDU5LCAoMCBtaXNzaW5nKVxuICAgICAgcGVyYy5hbHVtbmkgPCA0LjUgICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA1ODc1MTU3LCAoMCBtaXNzaW5nKVxuICAgICAgRXhwZW5kICAgICAgPCAxMDc3NyAgIHRvIHRoZSByaWdodCwgaW1wcm92ZT0wLjA1NjkzMjAzLCAoMCBtaXNzaW5nKVxuICBTdXJyb2dhdGUgc3BsaXRzOlxuICAgICAgUHJpdmF0ZSAgICA8IDEuNSAgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjc2NCwgYWRqPTAuNDAsICgwIHNwbGl0KVxuICAgICAgQXBwcyAgICAgICA8IDE1NjAgICAgdG8gdGhlIHJpZ2h0LCBhZ3JlZT0wLjc0OCwgYWRqPTAuMzYsICgwIHNwbGl0KVxuICAgICAgQWNjZXB0ICAgICA8IDEyNTguNSAgdG8gdGhlIHJpZ2h0LCBhZ3JlZT0wLjcyNCwgYWRqPTAuMzAsICgwIHNwbGl0KVxuICAgICAgRW5yb2xsICAgICA8IDY3MSAgICAgdG8gdGhlIHJpZ2h0LCBhZ3JlZT0wLjcyNCwgYWRqPTAuMzAsICgwIHNwbGl0KVxuICAgICAgUm9vbS5Cb2FyZCA8IDMwNDUgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjcyNCwgYWRqPTAuMzAsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciA1OiAxNzYgb2JzZXJ2YXRpb25zLCAgICBjb21wbGV4aXR5IHBhcmFtPTAuMDIyODkyOVxuICBtZWFuPTYxLjE4MTgyLCBNU0U9MTg3LjUyMzggXG4gIGxlZnQgc29uPTEwICg4MCBvYnMpIHJpZ2h0IHNvbj0xMSAoOTYgb2JzKVxuICBQcmltYXJ5IHNwbGl0czpcbiAgICAgIHBlcmMuYWx1bW5pIDwgMTUuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xMTE5NTcyMCwgKDAgbWlzc2luZylcbiAgICAgIE91dHN0YXRlICAgIDwgNzM5NyAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wNjIzMjIxOCwgKDAgbWlzc2luZylcbiAgICAgIFRvcDEwcGVyYyAgIDwgNTEuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wNTkzMzI0NSwgKDAgbWlzc2luZylcbiAgICAgIEFwcHMgICAgICAgIDwgMTEyMjEuNSB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wNTAxMDQ0NiwgKDAgbWlzc2luZylcbiAgICAgIFJvb20uQm9hcmQgIDwgNDEyNCAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4wNTAwODEzMSwgKDAgbWlzc2luZylcbiAgU3Vycm9nYXRlIHNwbGl0czpcbiAgICAgIE91dHN0YXRlICAgIDwgNzcxNC41ICB0byB0aGUgbGVmdCwgIGFncmVlPTAuNzEwLCBhZGo9MC4zNjIsICgwIHNwbGl0KVxuICAgICAgUHJpdmF0ZSAgICAgPCAxLjUgICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC42NzAsIGFkaj0wLjI3NSwgKDAgc3BsaXQpXG4gICAgICBTLkYuUmF0aW8gICA8IDE4LjA1ICAgdG8gdGhlIHJpZ2h0LCBhZ3JlZT0wLjY2NSwgYWRqPTAuMjYzLCAoMCBzcGxpdClcbiAgICAgIEYuVW5kZXJncmFkIDwgMzUwMS41ICB0byB0aGUgcmlnaHQsIGFncmVlPTAuNjU5LCBhZGo9MC4yNTAsICgwIHNwbGl0KVxuICAgICAgUC5VbmRlcmdyYWQgPCA4ODUgICAgIHRvIHRoZSByaWdodCwgYWdyZWU9MC42NTksIGFkaj0wLjI1MCwgKDAgc3BsaXQpXG5cbk5vZGUgbnVtYmVyIDY6IDg4IG9ic2VydmF0aW9ucywgICAgY29tcGxleGl0eSBwYXJhbT0wLjAxOTU5NDk0XG4gIG1lYW49NjguNDQzMTgsIE1TRT0xNTYuOTI4NiBcbiAgbGVmdCBzb249MTIgKDEwIG9icykgcmlnaHQgc29uPTEzICg3OCBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgVG9wMTBwZXJjICAgPCAxMi41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjIyOTAyMzEwLCAoMCBtaXNzaW5nKVxuICAgICAgRi5VbmRlcmdyYWQgPCA1MzUgICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjE5NTcwNjgwLCAoMCBtaXNzaW5nKVxuICAgICAgRW5yb2xsICAgICAgPCAxMDAgICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjExOTQ4MzIwLCAoMCBtaXNzaW5nKVxuICAgICAgcGVyYy5hbHVtbmkgPCAyMi41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjEwNTAzNzEwLCAoMCBtaXNzaW5nKVxuICAgICAgQXBwcyAgICAgICAgPCAzNzQuNSAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjA3MTcyNjIxLCAoMCBtaXNzaW5nKVxuICBTdXJyb2dhdGUgc3BsaXRzOlxuICAgICAgVG9wMjVwZXJjICAgPCAzMC41ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC45NTUsIGFkaj0wLjYsICgwIHNwbGl0KVxuICAgICAgcGVyYy5hbHVtbmkgPCA4LjUgICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC45MjAsIGFkaj0wLjMsICgwIHNwbGl0KVxuICAgICAgRW5yb2xsICAgICAgPCA5MC41ICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC45MDksIGFkaj0wLjIsICgwIHNwbGl0KVxuICAgICAgUy5GLlJhdGlvICAgPCAyMC41ICAgIHRvIHRoZSByaWdodCwgYWdyZWU9MC45MDksIGFkaj0wLjIsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciA3OiAxNTUgb2JzZXJ2YXRpb25zLCAgICBjb21wbGV4aXR5IHBhcmFtPTAuMDMwNDQyODFcbiAgbWVhbj04MC4yMzIyNiwgTVNFPTE1NS4wODE1IFxuICBsZWZ0IHNvbj0xNCAoNDYgb2JzKSByaWdodCBzb249MTUgKDEwOSBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgcGVyYy5hbHVtbmkgPCAyMi41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjIwNDQxNTEsICgwIG1pc3NpbmcpXG4gICAgICBUb3AyNXBlcmMgICA8IDUwLjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTg3MjczMSwgKDAgbWlzc2luZylcbiAgICAgIFRvcDEwcGVyYyAgIDwgNjEgICAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xNDA2ODIwLCAoMCBtaXNzaW5nKVxuICAgICAgT3V0c3RhdGUgICAgPCAxNjc5MSAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjEyNTM5MDcsICgwIG1pc3NpbmcpXG4gICAgICBFeHBlbmQgICAgICA8IDIxMzE4ICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTEyNzc3MiwgKDAgbWlzc2luZylcbiAgU3Vycm9nYXRlIHNwbGl0czpcbiAgICAgIFAuVW5kZXJncmFkIDwgODI1LjUgICB0byB0aGUgcmlnaHQsIGFncmVlPTAuODI2LCBhZGo9MC40MTMsICgwIHNwbGl0KVxuICAgICAgUy5GLlJhdGlvICAgPCAxNS4wNSAgIHRvIHRoZSByaWdodCwgYWdyZWU9MC43ODcsIGFkaj0wLjI4MywgKDAgc3BsaXQpXG4gICAgICBBY2NlcHQgICAgICA8IDU3OTggICAgdG8gdGhlIHJpZ2h0LCBhZ3JlZT0wLjc0OCwgYWRqPTAuMTUyLCAoMCBzcGxpdClcbiAgICAgIFBlcnNvbmFsICAgIDwgMTcxNy41ICB0byB0aGUgcmlnaHQsIGFncmVlPTAuNzQ4LCBhZGo9MC4xNTIsICgwIHNwbGl0KVxuICAgICAgRi5VbmRlcmdyYWQgPCA3NzE1LjUgIHRvIHRoZSByaWdodCwgYWdyZWU9MC43NDIsIGFkaj0wLjEzMCwgKDAgc3BsaXQpXG5cbk5vZGUgbnVtYmVyIDg6IDUwIG9ic2VydmF0aW9uc1xuICBtZWFuPTQ2LjE2LCBNU0U9MTI0LjYxNDQgXG5cbk5vZGUgbnVtYmVyIDk6IDc3IG9ic2VydmF0aW9ucywgICAgY29tcGxleGl0eSBwYXJhbT0wLjAxMDg0MzQ3XG4gIG1lYW49NTUuMzc2NjIsIE1TRT0yNjAuMzY0NiBcbiAgbGVmdCBzb249MTggKDggb2JzKSByaWdodCBzb249MTkgKDY5IG9icylcbiAgUHJpbWFyeSBzcGxpdHM6XG4gICAgICBFbnJvbGwgICAgICA8IDEwNS41ICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDg3MzAwMjksICgwIG1pc3NpbmcpXG4gICAgICBwZXJjLmFsdW1uaSA8IDQuNSAgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDg1NzQ4NDksICgwIG1pc3NpbmcpXG4gICAgICBSb29tLkJvYXJkICA8IDQ3NjUgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDc5MzQ2MTUsICgwIG1pc3NpbmcpXG4gICAgICBGLlVuZGVyZ3JhZCA8IDEyMzEgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDcyOTczMzcsICgwIG1pc3NpbmcpXG4gICAgICBQLlVuZGVyZ3JhZCA8IDE4NiAgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMDcxNjQ2MDEsICgwIG1pc3NpbmcpXG4gIFN1cnJvZ2F0ZSBzcGxpdHM6XG4gICAgICBGLlVuZGVyZ3JhZCA8IDQwOC41ICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjk3NCwgYWRqPTAuNzUsICgwIHNwbGl0KVxuICAgICAgQXBwcyAgICAgICAgPCAxOTcuNSAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC45NDgsIGFkaj0wLjUwLCAoMCBzcGxpdClcbiAgICAgIEFjY2VwdCAgICAgIDwgMTUyICAgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuOTQ4LCBhZGo9MC41MCwgKDAgc3BsaXQpXG4gICAgICBQLlVuZGVyZ3JhZCA8IDI2ICAgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjkyMiwgYWRqPTAuMjUsICgwIHNwbGl0KVxuICAgICAgcGVyYy5hbHVtbmkgPCA0MS41ICAgIHRvIHRoZSByaWdodCwgYWdyZWU9MC45MjIsIGFkaj0wLjI1LCAoMCBzcGxpdClcblxuTm9kZSBudW1iZXIgMTA6IDgwIG9ic2VydmF0aW9uc1xuICBtZWFuPTU2LjE2MjUsIE1TRT0xNzUuMTYxMSBcblxuTm9kZSBudW1iZXIgMTE6IDk2IG9ic2VydmF0aW9uc1xuICBtZWFuPTY1LjM2NDU4LCBNU0U9MTU5LjMzNTggXG5cbk5vZGUgbnVtYmVyIDEyOiAxMCBvYnNlcnZhdGlvbnNcbiAgbWVhbj01MS43LCBNU0U9MjEwLjYxIFxuXG5Ob2RlIG51bWJlciAxMzogNzggb2JzZXJ2YXRpb25zXG4gIG1lYW49NzAuNTg5NzQsIE1TRT0xMDkuNDk4NCBcblxuTm9kZSBudW1iZXIgMTQ6IDQ2IG9ic2VydmF0aW9ucywgICAgY29tcGxleGl0eSBwYXJhbT0wLjAxMjkwMDA2XG4gIG1lYW49NzEuNTY1MjIsIE1TRT0xMzUuOTQxNCBcbiAgbGVmdCBzb249MjggKDEwIG9icykgcmlnaHQgc29uPTI5ICgzNiBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgVG9wMjVwZXJjIDwgNDguNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4zMzI5Njc4LCAoMCBtaXNzaW5nKVxuICAgICAgVG9wMTBwZXJjIDwgMTcgICAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4yODQ5NzU5LCAoMCBtaXNzaW5nKVxuICAgICAgUGhEICAgICAgIDwgNzQuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4xOTE4OTk0LCAoMCBtaXNzaW5nKVxuICAgICAgQXBwcyAgICAgIDwgNDQzOC41ICB0byB0aGUgcmlnaHQsIGltcHJvdmU9MC4xMDQzMDQ4LCAoMCBtaXNzaW5nKVxuICAgICAgQWNjZXB0ICAgIDwgMzQ5Mi41ICB0byB0aGUgcmlnaHQsIGltcHJvdmU9MC4xMDQzMDQ4LCAoMCBtaXNzaW5nKVxuICBTdXJyb2dhdGUgc3BsaXRzOlxuICAgICAgVG9wMTBwZXJjICAgPCAxNyAgICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC45NTcsIGFkaj0wLjgsICgwIHNwbGl0KVxuICAgICAgUGhEICAgICAgICAgPCA2NyAgICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC44OTEsIGFkaj0wLjUsICgwIHNwbGl0KVxuICAgICAgVGVybWluYWwgICAgPCA2NSAgICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC44NDgsIGFkaj0wLjMsICgwIHNwbGl0KVxuICAgICAgRXhwZW5kICAgICAgPCA3NTE3LjUgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC44MjYsIGFkaj0wLjIsICgwIHNwbGl0KVxuICAgICAgcGVyYy5hbHVtbmkgPCA4LjUgICAgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC44MDQsIGFkaj0wLjEsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciAxNTogMTA5IG9ic2VydmF0aW9ucywgICAgY29tcGxleGl0eSBwYXJhbT0wLjAxODY0MTA3XG4gIG1lYW49ODMuODg5OTEsIE1TRT0xMTguMDc5NiBcbiAgbGVmdCBzb249MzAgKDY0IG9icykgcmlnaHQgc29uPTMxICg0NSBvYnMpXG4gIFByaW1hcnkgc3BsaXRzOlxuICAgICAgQXBwcyAgICAgICA8IDI5NTAgICAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMjMzNzcwNCwgKDAgbWlzc2luZylcbiAgICAgIFRvcDI1cGVyYyAgPCA5My41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjIyMjg1OTIsICgwIG1pc3NpbmcpXG4gICAgICBUb3AxMHBlcmMgIDwgNzUuNSAgICB0byB0aGUgbGVmdCwgIGltcHJvdmU9MC4yMDI5Nzg4LCAoMCBtaXNzaW5nKVxuICAgICAgUm9vbS5Cb2FyZCA8IDU3MTQuNSAgdG8gdGhlIGxlZnQsICBpbXByb3ZlPTAuMTM4NDc5MCwgKDAgbWlzc2luZylcbiAgICAgIFRlcm1pbmFsICAgPCA5NS41ICAgIHRvIHRoZSBsZWZ0LCAgaW1wcm92ZT0wLjEzMjM5MjYsICgwIG1pc3NpbmcpXG4gIFN1cnJvZ2F0ZSBzcGxpdHM6XG4gICAgICBBY2NlcHQgICAgICA8IDE4NTYuNSAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjg1MywgYWRqPTAuNjQ0LCAoMCBzcGxpdClcbiAgICAgIEVucm9sbCAgICAgIDwgNTY3LjUgICB0byB0aGUgbGVmdCwgIGFncmVlPTAuODM1LCBhZGo9MC42MDAsICgwIHNwbGl0KVxuICAgICAgRi5VbmRlcmdyYWQgPCAyNjI0LjUgIHRvIHRoZSBsZWZ0LCAgYWdyZWU9MC44MzUsIGFkaj0wLjYwMCwgKDAgc3BsaXQpXG4gICAgICBUb3AxMHBlcmMgICA8IDU5ICAgICAgdG8gdGhlIGxlZnQsICBhZ3JlZT0wLjc4MCwgYWRqPTAuNDY3LCAoMCBzcGxpdClcbiAgICAgIEV4cGVuZCAgICAgIDwgMTM1MzEuNSB0byB0aGUgbGVmdCwgIGFncmVlPTAuNzgwLCBhZGo9MC40NjcsICgwIHNwbGl0KVxuXG5Ob2RlIG51bWJlciAxODogOCBvYnNlcnZhdGlvbnNcbiAgbWVhbj00MS4zNzUsIE1TRT00MzAuNDg0NCBcblxuTm9kZSBudW1iZXIgMTk6IDY5IG9ic2VydmF0aW9uc1xuICBtZWFuPTU3LCBNU0U9MjE1LjI3NTQgXG5cbk5vZGUgbnVtYmVyIDI4OiAxMCBvYnNlcnZhdGlvbnNcbiAgbWVhbj01OC44LCBNU0U9NDEuMTYgXG5cbk5vZGUgbnVtYmVyIDI5OiAzNiBvYnNlcnZhdGlvbnNcbiAgbWVhbj03NS4xMTExMSwgTVNFPTEwNC40MzIxIFxuXG5Ob2RlIG51bWJlciAzMDogNjQgb2JzZXJ2YXRpb25zXG4gIG1lYW49NzkuNDg0MzgsIE1TRT0xMTMuMzc0OCBcblxuTm9kZSBudW1iZXIgMzE6IDQ1IG9ic2VydmF0aW9uc1xuICBtZWFuPTkwLjE1NTU2LCBNU0U9NTcuOTA5MTQgXG4ifQ== -->
 <pre><code>Call:
 rpart(formula = Grad.Rate ~ ., data = training)
   n= 546 
 
            CP nsplit rel error    xerror       xstd
-1  0.25442039      0 1.0000000 1.0032859 0.05604881
-2  0.05719155      1 0.7455796 0.7661127 0.05162199
-3  0.03997876      2 0.6883881 0.7506899 0.05095326
-4  0.03059345      3 0.6484093 0.7255018 0.05150326
-5  0.02602144      4 0.6178158 0.7029199 0.05174704
-6  0.02288849      5 0.5917944 0.6795422 0.05101600
-7  0.02004597      6 0.5689059 0.6664614 0.05056656
-8  0.01065459      7 0.5488599 0.6613737 0.04807781
-9  0.01056539      8 0.5382054 0.6892874 0.05089383
-10 0.01000000      9 0.5276400 0.6930804 0.05110290
+1  0.29326131      0 1.0000000 1.0074845 0.05441355
+2  0.04833343      1 0.7067387 0.7218811 0.04647466
+3  0.04067484      2 0.6584053 0.7207920 0.04625081
+4  0.03044281      3 0.6177304 0.6966354 0.04479850
+5  0.02289290      4 0.5872876 0.6667014 0.04424399
+6  0.01959494      5 0.5643947 0.6656440 0.04409342
+7  0.01864107      6 0.5447998 0.6601378 0.04412762
+8  0.01595441      7 0.5261587 0.6462605 0.04339344
+9  0.01290006      8 0.5102043 0.6441283 0.04389624
+10 0.01084347      9 0.4973042 0.6602636 0.04521802
+11 0.01000000     10 0.4864607 0.6739495 0.04698025
 
 Variable importance
-   Outstate perc.alumni      Expend  Room.Board   S.F.Ratio     Private   Top10perc   Top25perc        Apps 
-         22          14          12          10           9           9           6           4           3 
-     Accept      Enroll         PhD F.Undergrad       Books    Personal P.Undergrad    Terminal 
-          2           2           2           2           1           1           1           1 
+   Outstate      Expend   Top10perc perc.alumni  Room.Board   S.F.Ratio        Apps      Accept   Top25perc 
+         21          12          11          11           9           8           5           5           4 
+     Enroll F.Undergrad         PhD P.Undergrad    Terminal     Private 
+          4           4           2           1           1           1 
 
-Node number 1: 546 observations,    complexity param=0.2544204
-  mean=65.5641, MSE=293.0334 
-  left son=2 (259 obs) right son=3 (287 obs)
+Node number 1: 546 observations,    complexity param=0.2932613
+  mean=65.56593, MSE=295.6156 
+  left son=2 (303 obs) right son=3 (243 obs)
   Primary splits:
-      Outstate    &lt; 9635    to the left,  improve=0.2544204, (0 missing)
-      perc.alumni &lt; 18.5    to the left,  improve=0.2055480, (0 missing)
-      Top10perc   &lt; 25.5    to the left,  improve=0.1552559, (0 missing)
-      Top25perc   &lt; 48.5    to the left,  improve=0.1417049, (0 missing)
-      Room.Board  &lt; 3785    to the left,  improve=0.1365601, (0 missing)
+      Outstate    &lt; 10572.5 to the left,  improve=0.2932613, (0 missing)
+      perc.alumni &lt; 18.5    to the left,  improve=0.1927418, (0 missing)
+      Top25perc   &lt; 51.5    to the left,  improve=0.1864449, (0 missing)
+      Top10perc   &lt; 25.5    to the left,  improve=0.1735334, (0 missing)
+      Room.Board  &lt; 4280    to the left,  improve=0.1637555, (0 missing)
   Surrogate splits:
-      Expend      &lt; 7938    to the left,  agree=0.791, adj=0.560, (0 split)
-      Room.Board  &lt; 3951    to the left,  agree=0.758, adj=0.490, (0 split)
-      Private     &lt; 1.5     to the left,  agree=0.744, adj=0.459, (0 split)
-      S.F.Ratio   &lt; 15.05   to the right, agree=0.727, adj=0.425, (0 split)
-      perc.alumni &lt; 18.5    to the left,  agree=0.716, adj=0.402, (0 split)
+      Expend      &lt; 8519    to the left,  agree=0.811, adj=0.576, (0 split)
+      Room.Board  &lt; 4245    to the left,  agree=0.767, adj=0.477, (0 split)
+      S.F.Ratio   &lt; 13.65   to the right, agree=0.722, adj=0.374, (0 split)
+      perc.alumni &lt; 20.5    to the left,  agree=0.718, adj=0.366, (0 split)
+      Top10perc   &lt; 26.5    to the left,  agree=0.714, adj=0.358, (0 split)
 
-Node number 2: 259 observations,    complexity param=0.03059345
-  mean=56.4749, MSE=244.1181 
-  left son=4 (147 obs) right son=5 (112 obs)
+Node number 2: 303 observations,    complexity param=0.04067484
+  mean=57.22772, MSE=225.8194 
+  left son=4 (127 obs) right son=5 (176 obs)
   Primary splits:
-      perc.alumni &lt; 16.5    to the left,  improve=0.07741739, (0 missing)
-      Top10perc   &lt; 30.5    to the left,  improve=0.06627744, (0 missing)
-      Top25perc   &lt; 47.5    to the left,  improve=0.05836590, (0 missing)
-      Outstate    &lt; 7799.5  to the left,  improve=0.04316801, (0 missing)
-      P.Undergrad &lt; 3734.5  to the right, improve=0.03906250, (0 missing)
+      Top25perc   &lt; 44.5    to the left,  improve=0.09594933, (0 missing)
+      perc.alumni &lt; 16.5    to the left,  improve=0.09082097, (0 missing)
+      Top10perc   &lt; 34.5    to the left,  improve=0.05142117, (0 missing)
+      Apps        &lt; 10864.5 to the left,  improve=0.04793183, (0 missing)
+      Outstate    &lt; 7392    to the left,  improve=0.04779030, (0 missing)
   Surrogate splits:
-      Outstate    &lt; 7832    to the left,  agree=0.672, adj=0.241, (0 split)
-      Top10perc   &lt; 29.5    to the left,  agree=0.633, adj=0.152, (0 split)
-      P.Undergrad &lt; 118.5   to the right, agree=0.618, adj=0.116, (0 split)
-      S.F.Ratio   &lt; 11.65   to the right, agree=0.618, adj=0.116, (0 split)
-      Personal    &lt; 1456.5  to the right, agree=0.614, adj=0.107, (0 split)
+      Top10perc &lt; 17.5    to the left,  agree=0.861, adj=0.669, (0 split)
+      Accept    &lt; 687.5   to the left,  agree=0.650, adj=0.165, (0 split)
+      PhD       &lt; 48.5    to the left,  agree=0.650, adj=0.165, (0 split)
+      Expend    &lt; 5110.5  to the left,  agree=0.640, adj=0.142, (0 split)
+      Apps      &lt; 888.5   to the left,  agree=0.637, adj=0.134, (0 split)
 
-Node number 3: 287 observations,    complexity param=0.05719155
-  mean=73.76655, MSE=195.3427 
-  left son=6 (265 obs) right son=7 (22 obs)
+Node number 3: 243 observations,    complexity param=0.04833343
+  mean=75.96296, MSE=187.8546 
+  left son=6 (88 obs) right son=7 (155 obs)
   Primary splits:
-      Top10perc   &lt; 67.5    to the left,  improve=0.1632159, (0 missing)
-      perc.alumni &lt; 26.5    to the left,  improve=0.1586411, (0 missing)
-      Outstate    &lt; 17540   to the left,  improve=0.1492954, (0 missing)
-      Top25perc   &lt; 83.5    to the left,  improve=0.1471578, (0 missing)
-      Apps        &lt; 1763    to the left,  improve=0.1181045, (0 missing)
+      Apps        &lt; 1295.5  to the left,  improve=0.1708990, (0 missing)
+      Top10perc   &lt; 17.5    to the left,  improve=0.1640818, (0 missing)
+      Top25perc   &lt; 50.5    to the left,  improve=0.1591976, (0 missing)
+      perc.alumni &lt; 22.5    to the left,  improve=0.1428255, (0 missing)
+      Enroll      &lt; 302.5   to the left,  improve=0.1363924, (0 missing)
   Surrogate splits:
-      Top25perc   &lt; 91.5    to the left,  agree=0.979, adj=0.727, (0 split)
-      Expend      &lt; 19294   to the left,  agree=0.951, adj=0.364, (0 split)
-      PhD         &lt; 95.5    to the left,  agree=0.948, adj=0.318, (0 split)
-      perc.alumni &lt; 48.5    to the left,  agree=0.937, adj=0.182, (0 split)
-      S.F.Ratio   &lt; 6       to the right, agree=0.934, adj=0.136, (0 split)
+      Accept      &lt; 957.5   to the left,  agree=0.951, adj=0.864, (0 split)
+      Enroll      &lt; 304.5   to the left,  agree=0.893, adj=0.705, (0 split)
+      F.Undergrad &lt; 1437.5  to the left,  agree=0.864, adj=0.625, (0 split)
+      PhD         &lt; 77.5    to the left,  agree=0.745, adj=0.295, (0 split)
+      Terminal    &lt; 80.5    to the left,  agree=0.720, adj=0.227, (0 split)
 
-Node number 4: 147 observations,    complexity param=0.01065459
-  mean=52.68027, MSE=232.6257 
-  left son=8 (139 obs) right son=9 (8 obs)
+Node number 4: 127 observations,    complexity param=0.01595441
+  mean=51.74803, MSE=227.1964 
+  left son=8 (50 obs) right son=9 (77 obs)
   Primary splits:
-      Books     &lt; 275     to the right, improve=0.04985075, (0 missing)
-      Enroll    &lt; 353.5   to the left,  improve=0.04672756, (0 missing)
-      S.F.Ratio &lt; 11.95   to the left,  improve=0.04310845, (0 missing)
-      Top10perc &lt; 40.5    to the left,  improve=0.04307432, (0 missing)
-      Top25perc &lt; 44.5    to the left,  improve=0.03951059, (0 missing)
-
-Node number 5: 112 observations,    complexity param=0.02288849
-  mean=61.45536, MSE=215.498 
-  left son=10 (9 obs) right son=11 (103 obs)
-  Primary splits:
-      Outstate    &lt; 4981.5  to the left,  improve=0.15172800, (0 missing)
-      Room.Board  &lt; 4684.5  to the left,  improve=0.08540052, (0 missing)
-      F.Undergrad &lt; 960     to the left,  improve=0.07001772, (0 missing)
-      Personal    &lt; 741     to the right, improve=0.06421308, (0 missing)
-      Top25perc   &lt; 61.5    to the left,  improve=0.06285631, (0 missing)
+      Outstate    &lt; 6881.5  to the left,  improve=0.08924741, (0 missing)
+      Personal    &lt; 1406.5  to the right, improve=0.07866604, (0 missing)
+      P.Undergrad &lt; 2369.5  to the right, improve=0.07477059, (0 missing)
+      perc.alumni &lt; 4.5     to the left,  improve=0.05875157, (0 missing)
+      Expend      &lt; 10777   to the right, improve=0.05693203, (0 missing)
   Surrogate splits:
-      Room.Board &lt; 2756    to the left,  agree=0.955, adj=0.444, (0 split)
-      Terminal   &lt; 98.5    to the right, agree=0.929, adj=0.111, (0 split)
+      Private    &lt; 1.5     to the left,  agree=0.764, adj=0.40, (0 split)
+      Apps       &lt; 1560    to the right, agree=0.748, adj=0.36, (0 split)
+      Accept     &lt; 1258.5  to the right, agree=0.724, adj=0.30, (0 split)
+      Enroll     &lt; 671     to the right, agree=0.724, adj=0.30, (0 split)
+      Room.Board &lt; 3045    to the left,  agree=0.724, adj=0.30, (0 split)
 
-Node number 6: 265 observations,    complexity param=0.03997876
-  mean=72.13962, MSE=172.8748 
-  left son=12 (99 obs) right son=13 (166 obs)
+Node number 5: 176 observations,    complexity param=0.0228929
+  mean=61.18182, MSE=187.5238 
+  left son=10 (80 obs) right son=11 (96 obs)
   Primary splits:
-      perc.alumni &lt; 22.5    to the left,  improve=0.13962440, (0 missing)
-      Top25perc   &lt; 50.5    to the left,  improve=0.11025590, (0 missing)
-      Top10perc   &lt; 18.5    to the left,  improve=0.09735212, (0 missing)
-      Apps        &lt; 1284.5  to the left,  improve=0.07557356, (0 missing)
-      Accept      &lt; 1071.5  to the left,  improve=0.06989298, (0 missing)
+      perc.alumni &lt; 15.5    to the left,  improve=0.11195720, (0 missing)
+      Outstate    &lt; 7397    to the left,  improve=0.06232218, (0 missing)
+      Top10perc   &lt; 51.5    to the left,  improve=0.05933245, (0 missing)
+      Apps        &lt; 11221.5 to the left,  improve=0.05010446, (0 missing)
+      Room.Board  &lt; 4124    to the left,  improve=0.05008131, (0 missing)
   Surrogate splits:
-      F.Undergrad &lt; 3557.5  to the right, agree=0.706, adj=0.212, (0 split)
-      P.Undergrad &lt; 975     to the right, agree=0.706, adj=0.212, (0 split)
-      Accept      &lt; 2773    to the right, agree=0.691, adj=0.172, (0 split)
-      Enroll      &lt; 865     to the right, agree=0.691, adj=0.172, (0 split)
-      Apps        &lt; 3739.5  to the right, agree=0.675, adj=0.131, (0 split)
+      Outstate    &lt; 7714.5  to the left,  agree=0.710, adj=0.362, (0 split)
+      Private     &lt; 1.5     to the left,  agree=0.670, adj=0.275, (0 split)
+      S.F.Ratio   &lt; 18.05   to the right, agree=0.665, adj=0.263, (0 split)
+      F.Undergrad &lt; 3501.5  to the right, agree=0.659, adj=0.250, (0 split)
+      P.Undergrad &lt; 885     to the right, agree=0.659, adj=0.250, (0 split)
 
-Node number 7: 22 observations
-  mean=93.36364, MSE=50.04959 
-
-Node number 8: 139 observations
-  mean=51.86331, MSE=214.6504 
-
-Node number 9: 8 observations
-  mean=66.875, MSE=331.8594 
-
-Node number 10: 9 observations
-  mean=42.11111, MSE=107.8765 
-
-Node number 11: 103 observations,    complexity param=0.01056539
-  mean=63.14563, MSE=189.3477 
-  left son=22 (93 obs) right son=23 (10 obs)
+Node number 6: 88 observations,    complexity param=0.01959494
+  mean=68.44318, MSE=156.9286 
+  left son=12 (10 obs) right son=13 (78 obs)
   Primary splits:
-      Personal    &lt; 741     to the right, improve=0.08667585, (0 missing)
-      F.Undergrad &lt; 909.5   to the left,  improve=0.08154406, (0 missing)
-      Accept      &lt; 694     to the left,  improve=0.08090998, (0 missing)
-      Room.Board  &lt; 4684.5  to the left,  improve=0.08075819, (0 missing)
-      Enroll      &lt; 266     to the left,  improve=0.07926067, (0 missing)
+      Top10perc   &lt; 12.5    to the left,  improve=0.22902310, (0 missing)
+      F.Undergrad &lt; 535     to the left,  improve=0.19570680, (0 missing)
+      Enroll      &lt; 100     to the left,  improve=0.11948320, (0 missing)
+      perc.alumni &lt; 22.5    to the left,  improve=0.10503710, (0 missing)
+      Apps        &lt; 374.5   to the left,  improve=0.07172621, (0 missing)
   Surrogate splits:
-      Top10perc &lt; 55      to the left,  agree=0.922, adj=0.2, (0 split)
-      Top25perc &lt; 87.5    to the left,  agree=0.922, adj=0.2, (0 split)
-      Expend    &lt; 3709.5  to the right, agree=0.922, adj=0.2, (0 split)
+      Top25perc   &lt; 30.5    to the left,  agree=0.955, adj=0.6, (0 split)
+      perc.alumni &lt; 8.5     to the left,  agree=0.920, adj=0.3, (0 split)
+      Enroll      &lt; 90.5    to the left,  agree=0.909, adj=0.2, (0 split)
+      S.F.Ratio   &lt; 20.5    to the right, agree=0.909, adj=0.2, (0 split)
 
-Node number 12: 99 observations,    complexity param=0.02004597
-  mean=65.77778, MSE=183.7688 
-  left son=24 (39 obs) right son=25 (60 obs)
+Node number 7: 155 observations,    complexity param=0.03044281
+  mean=80.23226, MSE=155.0815 
+  left son=14 (46 obs) right son=15 (109 obs)
   Primary splits:
-      Top10perc &lt; 21.5    to the left,  improve=0.17629090, (0 missing)
-      Top25perc &lt; 50.5    to the left,  improve=0.13551650, (0 missing)
-      S.F.Ratio &lt; 9.9     to the right, improve=0.05898719, (0 missing)
-      Personal  &lt; 715     to the right, improve=0.05671588, (0 missing)
-      PhD       &lt; 81.5    to the left,  improve=0.05423409, (0 missing)
+      perc.alumni &lt; 22.5    to the left,  improve=0.2044151, (0 missing)
+      Top25perc   &lt; 50.5    to the left,  improve=0.1872731, (0 missing)
+      Top10perc   &lt; 61      to the left,  improve=0.1406820, (0 missing)
+      Outstate    &lt; 16791   to the left,  improve=0.1253907, (0 missing)
+      Expend      &lt; 21318   to the left,  improve=0.1127772, (0 missing)
   Surrogate splits:
-      Top25perc &lt; 45.5    to the left,  agree=0.919, adj=0.795, (0 split)
-      PhD       &lt; 71.5    to the left,  agree=0.778, adj=0.436, (0 split)
-      Apps      &lt; 898     to the left,  agree=0.707, adj=0.256, (0 split)
-      Terminal  &lt; 77.5    to the left,  agree=0.707, adj=0.256, (0 split)
-      Enroll    &lt; 218.5   to the left,  agree=0.697, adj=0.231, (0 split)
+      P.Undergrad &lt; 825.5   to the right, agree=0.826, adj=0.413, (0 split)
+      S.F.Ratio   &lt; 15.05   to the right, agree=0.787, adj=0.283, (0 split)
+      Accept      &lt; 5798    to the right, agree=0.748, adj=0.152, (0 split)
+      Personal    &lt; 1717.5  to the right, agree=0.748, adj=0.152, (0 split)
+      F.Undergrad &lt; 7715.5  to the right, agree=0.742, adj=0.130, (0 split)
 
-Node number 13: 166 observations,    complexity param=0.02602144
-  mean=75.93373, MSE=127.845 
-  left son=26 (107 obs) right son=27 (59 obs)
+Node number 8: 50 observations
+  mean=46.16, MSE=124.6144 
+
+Node number 9: 77 observations,    complexity param=0.01084347
+  mean=55.37662, MSE=260.3646 
+  left son=18 (8 obs) right son=19 (69 obs)
   Primary splits:
-      Apps        &lt; 1762    to the left,  improve=0.19617760, (0 missing)
-      Enroll      &lt; 404.5   to the left,  improve=0.18250270, (0 missing)
-      Accept      &lt; 1506    to the left,  improve=0.16046040, (0 missing)
-      F.Undergrad &lt; 1621.5  to the left,  improve=0.16008080, (0 missing)
-      Top25perc   &lt; 54.5    to the left,  improve=0.07322463, (0 missing)
+      Enroll      &lt; 105.5   to the left,  improve=0.08730029, (0 missing)
+      perc.alumni &lt; 4.5     to the left,  improve=0.08574849, (0 missing)
+      Room.Board  &lt; 4765    to the left,  improve=0.07934615, (0 missing)
+      F.Undergrad &lt; 1231    to the left,  improve=0.07297337, (0 missing)
+      P.Undergrad &lt; 186     to the left,  improve=0.07164601, (0 missing)
   Surrogate splits:
-      Accept      &lt; 1506    to the left,  agree=0.964, adj=0.898, (0 split)
-      Enroll      &lt; 460     to the left,  agree=0.886, adj=0.678, (0 split)
-      F.Undergrad &lt; 1698    to the left,  agree=0.867, adj=0.627, (0 split)
-      Outstate    &lt; 15815.5 to the left,  agree=0.795, adj=0.424, (0 split)
-      Books       &lt; 632     to the left,  agree=0.717, adj=0.203, (0 split)
+      F.Undergrad &lt; 408.5   to the left,  agree=0.974, adj=0.75, (0 split)
+      Apps        &lt; 197.5   to the left,  agree=0.948, adj=0.50, (0 split)
+      Accept      &lt; 152     to the left,  agree=0.948, adj=0.50, (0 split)
+      P.Undergrad &lt; 26      to the left,  agree=0.922, adj=0.25, (0 split)
+      perc.alumni &lt; 41.5    to the right, agree=0.922, adj=0.25, (0 split)
 
-Node number 22: 93 observations
-  mean=61.8172, MSE=143.2031 
+Node number 10: 80 observations
+  mean=56.1625, MSE=175.1611 
 
-Node number 23: 10 observations
-  mean=75.5, MSE=449.45 
+Node number 11: 96 observations
+  mean=65.36458, MSE=159.3358 
 
-Node number 24: 39 observations
-  mean=58.71795, MSE=132.7153 
+Node number 12: 10 observations
+  mean=51.7, MSE=210.61 
 
-Node number 25: 60 observations
-  mean=70.36667, MSE=163.4989 
+Node number 13: 78 observations
+  mean=70.58974, MSE=109.4984 
 
-Node number 26: 107 observations
-  mean=72.21495, MSE=121.3089 
+Node number 14: 46 observations,    complexity param=0.01290006
+  mean=71.56522, MSE=135.9414 
+  left son=28 (10 obs) right son=29 (36 obs)
+  Primary splits:
+      Top25perc &lt; 48.5    to the left,  improve=0.3329678, (0 missing)
+      Top10perc &lt; 17      to the left,  improve=0.2849759, (0 missing)
+      PhD       &lt; 74.5    to the left,  improve=0.1918994, (0 missing)
+      Apps      &lt; 4438.5  to the right, improve=0.1043048, (0 missing)
+      Accept    &lt; 3492.5  to the right, improve=0.1043048, (0 missing)
+  Surrogate splits:
+      Top10perc   &lt; 17      to the left,  agree=0.957, adj=0.8, (0 split)
+      PhD         &lt; 67      to the left,  agree=0.891, adj=0.5, (0 split)
+      Terminal    &lt; 65      to the left,  agree=0.848, adj=0.3, (0 split)
+      Expend      &lt; 7517.5  to the left,  agree=0.826, adj=0.2, (0 split)
+      perc.alumni &lt; 8.5     to the left,  agree=0.804, adj=0.1, (0 split)
 
-Node number 27: 59 observations
-  mean=82.67797, MSE=69.13358 </code></pre>
+Node number 15: 109 observations,    complexity param=0.01864107
+  mean=83.88991, MSE=118.0796 
+  left son=30 (64 obs) right son=31 (45 obs)
+  Primary splits:
+      Apps       &lt; 2950    to the left,  improve=0.2337704, (0 missing)
+      Top25perc  &lt; 93.5    to the left,  improve=0.2228592, (0 missing)
+      Top10perc  &lt; 75.5    to the left,  improve=0.2029788, (0 missing)
+      Room.Board &lt; 5714.5  to the left,  improve=0.1384790, (0 missing)
+      Terminal   &lt; 95.5    to the left,  improve=0.1323926, (0 missing)
+  Surrogate splits:
+      Accept      &lt; 1856.5  to the left,  agree=0.853, adj=0.644, (0 split)
+      Enroll      &lt; 567.5   to the left,  agree=0.835, adj=0.600, (0 split)
+      F.Undergrad &lt; 2624.5  to the left,  agree=0.835, adj=0.600, (0 split)
+      Top10perc   &lt; 59      to the left,  agree=0.780, adj=0.467, (0 split)
+      Expend      &lt; 13531.5 to the left,  agree=0.780, adj=0.467, (0 split)
+
+Node number 18: 8 observations
+  mean=41.375, MSE=430.4844 
+
+Node number 19: 69 observations
+  mean=57, MSE=215.2754 
+
+Node number 28: 10 observations
+  mean=58.8, MSE=41.16 
+
+Node number 29: 36 observations
+  mean=75.11111, MSE=104.4321 
+
+Node number 30: 64 observations
+  mean=79.48438, MSE=113.3748 
+
+Node number 31: 45 observations
+  mean=90.15556, MSE=57.90914 </code></pre>
 <!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gU3F1YXJlZCBlcnJvciBvZiB0aGUgZGVjaXNpb24gdHJlZSBpcyAlZlwiLCBtc2VUcmVlKSlcbmBgYCJ9 -->
-<pre class="r"><code>message(sprintf(&quot;The Mean Squared error of the decision tree is %f&quot;, mseTree))</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgZGVjaXNpb24gdHJlZSBpcyAlZlwiLCBtc2VUcmVlKSlcbmBgYCJ9 -->
+<pre class="r"><code>message(sprintf(&quot;The Mean squared error of the decision tree is %f&quot;, mseTree))</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gU3F1YXJlZCBlcnJvciBvZiB0aGUgZGVjaXNpb24gdHJlZSBpcyAxOTAuMzUzNzY4XG4ifQ== -->
-<pre><code>The Mean Squared error of the decision tree is 190.353768</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgZGVjaXNpb24gdHJlZSBpcyAyMTQuNjMzMzQ1XG4ifQ== -->
+<pre><code>The Mean squared error of the decision tree is 214.633345</code></pre>
 <!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gU3F1YXJlZCBlcnJvciBvZiB0aGUgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gZGVjaXNpb24gdHJlZSBpcyAlZlwiLCBtc2VDcm9zc1RyZWUpKVxuYGBgIn0= -->
-<pre class="r"><code>message(sprintf(&quot;The Mean Squared error of the k-fold cross validation decision tree is %f&quot;, mseCrossTree))</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShcIk1ldHJpY3MgZm9yIGZvciB0aGUgZGVjaXNpb24gdHJlZSB3aXRoIGNyb3NzIHZhbGlkYXRpb24gZml0XCIpXG5gYGAifQ== -->
+<pre class="r"><code>message(&quot;Metrics for for the decision tree with cross validation fit&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gU3F1YXJlZCBlcnJvciBvZiB0aGUgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gZGVjaXNpb24gdHJlZSBpcyAyMDcuNDgyMTczXG4ifQ== -->
-<pre><code>The Mean Squared error of the k-fold cross validation decision tree is 207.482173</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiTWV0cmljcyBmb3IgZm9yIHRoZSBkZWNpc2lvbiB0cmVlIHdpdGggY3Jvc3MgdmFsaWRhdGlvbiBmaXRcbiJ9 -->
+<pre><code>Metrics for for the decision tree with cross validation fit</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShjdi5maXQkcmVzdWx0cylcbmBgYCJ9 -->
+<pre class="r"><code>summary(cv.fit$results)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgIGNwICAgICAgICAgICAgICBSTVNFICAgICAgICAgIFJzcXVhcmVkICAgICAgICAgICAgTUFFICAgICAgIFxuIE1pbi4gICA6MC4wMTAwICAgTWluLiAgIDoxMy45OSAgIE1pbi4gICA6MC4wMjk1NiAgIE1pbi4gICA6MTAuNTkgIFxuIDFzdCBRdS46MC4xMzI1ICAgMXN0IFF1LjoxNC42OCAgIDFzdCBRdS46MC4yNzE0OSAgIDFzdCBRdS46MTEuNTYgIFxuIE1lZGlhbiA6MC4yNTUwICAgTWVkaWFuIDoxNC42OCAgIE1lZGlhbiA6MC4yNzE0OSAgIE1lZGlhbiA6MTEuNTYgIFxuIE1lYW4gICA6MC4yNTUwICAgTWVhbiAgIDoxNS43MyAgIE1lYW4gICA6MC41NjExNSAgIE1lYW4gICA6MTIuNTYgIFxuIDNyZCBRdS46MC4zNzc1ICAgM3JkIFF1LjoxNy4yMyAgIDNyZCBRdS46MS4wMDAwMCAgIDNyZCBRdS46MTQuMDQgIFxuIE1heC4gICA6MC41MDAwICAgTWF4LiAgIDoxNy4yOCAgIE1heC4gICA6MS4wMDAwMCAgIE1heC4gICA6MTQuMDUgIFxuIn0= -->
+<pre><code>       cp              RMSE          Rsquared            MAE       
+ Min.   :0.0100   Min.   :13.99   Min.   :0.02956   Min.   :10.59  
+ 1st Qu.:0.1325   1st Qu.:14.68   1st Qu.:0.27149   1st Qu.:11.56  
+ Median :0.2550   Median :14.68   Median :0.27149   Median :11.56  
+ Mean   :0.2550   Mean   :15.73   Mean   :0.56115   Mean   :12.56  
+ 3rd Qu.:0.3775   3rd Qu.:17.23   3rd Qu.:1.00000   3rd Qu.:14.04  
+ Max.   :0.5000   Max.   :17.28   Max.   :1.00000   Max.   :14.05  </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gZGVjaXNpb24gdHJlZSBpcyAlZlwiLCBtc2VDcm9zc1RyZWUpKVxuYGBgIn0= -->
+<pre class="r"><code>message(sprintf(&quot;The Mean squared error of the k-fold cross validation decision tree is %f&quot;, mseCrossTree))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gZGVjaXNpb24gdHJlZSBpcyAyMTQuNjMzMzQ1XG4ifQ== -->
+<pre><code>The Mean squared error of the k-fold cross validation decision tree is 214.633345</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p><strong>Results</strong></p>
+<p>The cross validated decision tree performance traits show that the
+complexity of the model is low as cp is very low. However, it seems that
+this model R^2 explains only a moderate amount of variance as indicated
+by the R^2 mean value of ~0.56. Also, the RMSE and MAE values indicate
+that the model has a high level of error with its predications. Also the
+MSE on the testing data is significantly higher than than the linear
+regression models showing making this model inadequete to predict the
+graduation rate.</p>
+<p>The decision tree model without cross validation has a lower MSE of
+~214.63 compared to the other decision tree model, but both are still
+worse at predicting the repsonse than the linear regression models.
+However, the variable importance of the decision tree shows us that
+Oustate is the most imporant predictor then other predictors that impact
+the MSE are Expend, Top10perc, perc.alumni, Room.Board, and
+S.F.Ratio.</p>
+<p>Both decision tree models do not predict graduation rate well, but it
+does give us insight into what predictors might be correllated with the
+graduation rate.</p>
+<h1 style="font-size: 18px;">
+<strong>Random Forest</strong>
+</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBBbHJlYWR5IHBhcnRpdGlvbmVkIGRhdGEgZm9yIGRlY2lzaW9uIHRyZWVcblxuI3RyYWluSW5kZXggPSBjcmVhdGVEYXRhUGFydGl0aW9uKENvbGxlZ2VfZGF0YSRHcmFkLlJhdGUsIHAgPSAwLjcsIGxpc3QgPSBGQUxTRSlcbiN0cmFpbmluZyA9IG5hLm9taXQoQ29sbGVnZV9kYXRhW3RyYWluSW5kZXgsIF0pXG4jdGVzdGluZyA9IG5hLm9taXQoQ29sbGVnZV9kYXRhWy10cmFpbkluZGV4LCBdKVxuXG5saWJyYXJ5KHJhbmRvbUZvcmVzdClcbiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4jIEZpdCBhIHJhbmRvbSBmb3Jlc3Qgb24gdGhlIHRyYWluaW5nIGRhdGFcbnJhbmQuZm9yZXN0ID0gcmFuZG9tRm9yZXN0KEdyYWQuUmF0ZSB+IC4sIGRhdGEgPSB0cmFpbmluZywgbnRyZWUgPSA1MDApXG5cbiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiMgcHJlZm9ybSBjcm9zcyB2YWxpZGF0aW9uIHRvIGdldCB0aGUgYmVzdCBmaXRcblxuY3YgPSB0cmFpbkNvbnRyb2wobWV0aG9kID0gXCJjdlwiLCBudW1iZXIgPSBrKVxuY3YuZml0UmFuZCA9IHRyYWluKEdyYWQuUmF0ZSB+IC4sIGRhdGEgPSB0cmFpbmluZywgbWV0aG9kID0gXCJyZlwiLCB0ckNvbnRyb2wgPSBjdiwgdHVuZUxlbmd0aD01KSAjIFRPRE9cbiNUT0RPXG5cbiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4jIEdlbmVyYWxpemF0aW9uIGVycm9yXG5cbnByZWQgPSBwcmVkaWN0KHJhbmQuZm9yZXN0LCB0ZXN0aW5nKVxubXNlUmFuZCA9IG1lYW4oKHByZWQgLSB0ZXN0aW5nJEdyYWQuUmF0ZSleMilcblxucHJlZCA9IHByZWRpY3QoY3YuZml0UmFuZCwgdGVzdGluZylcbm1zZUNyb3NzUmFuZCA9IG1lYW4oKHByZWQgLSB0ZXN0aW5nJEdyYWQuUmF0ZSleMilcblxuc3VtbWFyeShyYW5kLmZvcmVzdClcbmBgYCJ9 -->
+<pre class="r"><code># Already partitioned data for decision tree
+
+#trainIndex = createDataPartition(College_data$Grad.Rate, p = 0.7, list = FALSE)
+#training = na.omit(College_data[trainIndex, ])
+#testing = na.omit(College_data[-trainIndex, ])
+
+library(randomForest)
+#----------------------------------------------------------------
+# Fit a random forest on the training data
+rand.forest = randomForest(Grad.Rate ~ ., data = training, ntree = 500)
+
+#------------------------------------------------
+# preform cross validation to get the best fit
+
+cv = trainControl(method = &quot;cv&quot;, number = k)
+cv.fitRand = train(Grad.Rate ~ ., data = training, method = &quot;rf&quot;, trControl = cv, tuneLength=5) # TODO
+#TODO
+
+#----------------------------------------------
+# Generalization error
+
+pred = predict(rand.forest, testing)
+mseRand = mean((pred - testing$Grad.Rate)^2)
+
+pred = predict(cv.fitRand, testing)
+mseCrossRand = mean((pred - testing$Grad.Rate)^2)
+
+summary(rand.forest)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAgICAgICAgIExlbmd0aCBDbGFzcyAgTW9kZSAgICAgXG5jYWxsICAgICAgICAgICAgICA0ICAgIC1ub25lLSBjYWxsICAgICBcbnR5cGUgICAgICAgICAgICAgIDEgICAgLW5vbmUtIGNoYXJhY3RlclxucHJlZGljdGVkICAgICAgIDU0NiAgICAtbm9uZS0gbnVtZXJpYyAgXG5tc2UgICAgICAgICAgICAgNTAwICAgIC1ub25lLSBudW1lcmljICBcbnJzcSAgICAgICAgICAgICA1MDAgICAgLW5vbmUtIG51bWVyaWMgIFxub29iLnRpbWVzICAgICAgIDU0NiAgICAtbm9uZS0gbnVtZXJpYyAgXG5pbXBvcnRhbmNlICAgICAgIDE3ICAgIC1ub25lLSBudW1lcmljICBcbmltcG9ydGFuY2VTRCAgICAgIDAgICAgLW5vbmUtIE5VTEwgICAgIFxubG9jYWxJbXBvcnRhbmNlICAgMCAgICAtbm9uZS0gTlVMTCAgICAgXG5wcm94aW1pdHkgICAgICAgICAwICAgIC1ub25lLSBOVUxMICAgICBcbm50cmVlICAgICAgICAgICAgIDEgICAgLW5vbmUtIG51bWVyaWMgIFxubXRyeSAgICAgICAgICAgICAgMSAgICAtbm9uZS0gbnVtZXJpYyAgXG5mb3Jlc3QgICAgICAgICAgIDExICAgIC1ub25lLSBsaXN0ICAgICBcbmNvZWZzICAgICAgICAgICAgIDAgICAgLW5vbmUtIE5VTEwgICAgIFxueSAgICAgICAgICAgICAgIDU0NiAgICAtbm9uZS0gbnVtZXJpYyAgXG50ZXN0ICAgICAgICAgICAgICAwICAgIC1ub25lLSBOVUxMICAgICBcbmluYmFnICAgICAgICAgICAgIDAgICAgLW5vbmUtIE5VTEwgICAgIFxudGVybXMgICAgICAgICAgICAgMyAgICB0ZXJtcyAgY2FsbCAgICAgXG4ifQ== -->
+<pre><code>                Length Class  Mode     
+call              4    -none- call     
+type              1    -none- character
+predicted       546    -none- numeric  
+mse             500    -none- numeric  
+rsq             500    -none- numeric  
+oob.times       546    -none- numeric  
+importance       17    -none- numeric  
+importanceSD      0    -none- NULL     
+localImportance   0    -none- NULL     
+proximity         0    -none- NULL     
+ntree             1    -none- numeric  
+mtry              1    -none- numeric  
+forest           11    -none- list     
+coefs             0    -none- NULL     
+y               546    -none- numeric  
+test              0    -none- NULL     
+inbag             0    -none- NULL     
+terms             3    terms  call     </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShjdi5maXRSYW5kKVxuYGBgIn0= -->
+<pre class="r"><code>summary(cv.fitRand)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAgICAgICAgIExlbmd0aCBDbGFzcyAgICAgIE1vZGUgICAgIFxuY2FsbCAgICAgICAgICAgICAgNCAgICAtbm9uZS0gICAgIGNhbGwgICAgIFxudHlwZSAgICAgICAgICAgICAgMSAgICAtbm9uZS0gICAgIGNoYXJhY3RlclxucHJlZGljdGVkICAgICAgIDU0NiAgICAtbm9uZS0gICAgIG51bWVyaWMgIFxubXNlICAgICAgICAgICAgIDUwMCAgICAtbm9uZS0gICAgIG51bWVyaWMgIFxucnNxICAgICAgICAgICAgIDUwMCAgICAtbm9uZS0gICAgIG51bWVyaWMgIFxub29iLnRpbWVzICAgICAgIDU0NiAgICAtbm9uZS0gICAgIG51bWVyaWMgIFxuaW1wb3J0YW5jZSAgICAgICAxNyAgICAtbm9uZS0gICAgIG51bWVyaWMgIFxuaW1wb3J0YW5jZVNEICAgICAgMCAgICAtbm9uZS0gICAgIE5VTEwgICAgIFxubG9jYWxJbXBvcnRhbmNlICAgMCAgICAtbm9uZS0gICAgIE5VTEwgICAgIFxucHJveGltaXR5ICAgICAgICAgMCAgICAtbm9uZS0gICAgIE5VTEwgICAgIFxubnRyZWUgICAgICAgICAgICAgMSAgICAtbm9uZS0gICAgIG51bWVyaWMgIFxubXRyeSAgICAgICAgICAgICAgMSAgICAtbm9uZS0gICAgIG51bWVyaWMgIFxuZm9yZXN0ICAgICAgICAgICAxMSAgICAtbm9uZS0gICAgIGxpc3QgICAgIFxuY29lZnMgICAgICAgICAgICAgMCAgICAtbm9uZS0gICAgIE5VTEwgICAgIFxueSAgICAgICAgICAgICAgIDU0NiAgICAtbm9uZS0gICAgIG51bWVyaWMgIFxudGVzdCAgICAgICAgICAgICAgMCAgICAtbm9uZS0gICAgIE5VTEwgICAgIFxuaW5iYWcgICAgICAgICAgICAgMCAgICAtbm9uZS0gICAgIE5VTEwgICAgIFxueE5hbWVzICAgICAgICAgICAxNyAgICAtbm9uZS0gICAgIGNoYXJhY3RlclxucHJvYmxlbVR5cGUgICAgICAgMSAgICAtbm9uZS0gICAgIGNoYXJhY3RlclxudHVuZVZhbHVlICAgICAgICAgMSAgICBkYXRhLmZyYW1lIGxpc3QgICAgIFxub2JzTGV2ZWxzICAgICAgICAgMSAgICAtbm9uZS0gICAgIGxvZ2ljYWwgIFxucGFyYW0gICAgICAgICAgICAgMCAgICAtbm9uZS0gICAgIGxpc3QgICAgIFxuIn0= -->
+<pre><code>                Length Class      Mode     
+call              4    -none-     call     
+type              1    -none-     character
+predicted       546    -none-     numeric  
+mse             500    -none-     numeric  
+rsq             500    -none-     numeric  
+oob.times       546    -none-     numeric  
+importance       17    -none-     numeric  
+importanceSD      0    -none-     NULL     
+localImportance   0    -none-     NULL     
+proximity         0    -none-     NULL     
+ntree             1    -none-     numeric  
+mtry              1    -none-     numeric  
+forest           11    -none-     list     
+coefs             0    -none-     NULL     
+y               546    -none-     numeric  
+test              0    -none-     NULL     
+inbag             0    -none-     NULL     
+xNames           17    -none-     character
+problemType       1    -none-     character
+tuneValue         1    data.frame list     
+obsLevels         1    -none-     logical  
+param             0    -none-     list     </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgcmFuZG9tIGZvcmVzdCBpcyAlZlwiLCBtc2VSYW5kKSlcbmBgYCJ9 -->
+<pre class="r"><code>message(sprintf(&quot;The Mean squared error of the random forest is %f&quot;, mseRand))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgcmFuZG9tIGZvcmVzdCBpcyAxODQuOTU4MTA1XG4ifQ== -->
+<pre><code>The Mean squared error of the random forest is 184.958105</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVzc2FnZShzcHJpbnRmKFwiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gcmFuZG9tIGZvcmVzdCBpcyAlZlwiLCBtc2VDcm9zc1JhbmQpKVxuYGBgIn0= -->
+<pre class="r"><code>message(sprintf(&quot;The Mean squared error of the k-fold cross validation random forest is %f&quot;, mseCrossRand))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gcmFuZG9tIGZvcmVzdCBpcyAxODQuMTIzODc3XG4ifQ== -->
+<pre><code>The Mean squared error of the k-fold cross validation random forest is 184.123877</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<h1 style="font-size: 30px;">
+Results
+</h1>
 <p>This project will provide valuable insights into the correlation
 between different factors and the performance of US colleges. Through
 the use of statistical analysis and machine learning techniques, I aim
@@ -2176,9 +2451,8 @@ to determine which variables are most significant and provide
 recommendations for students who are seeking to select the best college
 for their needs.</p>
 <!-- rnb-text-end -->
-</div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNTIDY3MCBGaW5hbCBQcm9qZWN0IFIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KIw0KKipJbnRyb2R1Y3Rpb24qKg0KDQpGb3IgbXkgcHJvamVjdCwgSSBwbGFuIHRvIHdvcmsgd2l0aCB0aGUgQ29sbGVnZSBkYXRhc2V0IGxvY2F0ZWQgaW4gdGhlIElTTFIyIGxpYnJhcnkgY3JlYXRlZCBieSB0aGUgYXV0aG9ycyBvZiB0aGUgYm9vayAiQW4gSW50cm9kdWN0aW9uIHRvIFN0YXRpc3RpY2FsIExlYXJuaW5nIHdpdGggQXBwbGljYXRpb25zIGluIFIiLiBUaGlzIGRhdGFzZXQgd2FzIGNvbGxlY3RlZCBieSBzYW1wbGluZyBpbmZvcm1hdGlvbiBmcm9tIDc3NyBjb2xsZWdlcyBmcm9tIHRoZSAxOTk1IGlzc3VlIG9mIFVTIE5ld3MgYW5kIFdvcmxkIFJlcG9ydCB3aGljaCBpcyBhIG5ld3MgbWFnYXppbmUgdGhhdCBwdWJsaXNoZXMgcmFua2luZ3Mgb2YgY29sbGVnZXMgd2l0aGluIHRoZSBVUy4gVGhlIHB1cnBvc2Ugb2YgY29sbGVjdGluZyB0aGlzIGRhdGEgd2FzIHRvIHByb3ZpZGUgYSByZXNvdXJjZSBmb3Igc3R1ZGVudHMgYW5kIHJlc2VhcmNoZXJzIHRvIGV4cGxvcmUgdGhlIGNvcnJlbGF0aW9uIGJldHdlZW4gZGlmZmVyZW50IGZhY3RvcnMgYW5kIHRoZSBwZXJmb3JtYW5jZSBvZiBVUyBjb2xsZWdlcy4gRWFjaCBjb2xsZWdlIGlzIHJlcHJlc2VudGVkIGluIDE4IGRpZmZlcmVudCBjb2x1bW5zIGNvbnRhaW5pbmcgc3RhdGlzdGljcyBvbiB2YXJpb3VzIGFzcGVjdHMgb2YgdGhhdCBjb2xsZWdlIHdoaWNoIGluY2x1ZGU6DQoNCjEuIFByaXZhdGU6IEEgZmFjdG9yIGluZGljYXRpbmcgd2hldGhlciB0aGUgY29sbGVnZSBpcyBwcml2YXRlIG9yIHB1YmxpYy4NCjIuIEFwcHM6IFRoZSBudW1iZXIgb2YgYXBwbGljYXRpb25zIHJlY2VpdmVkIGJ5IHRoZSBjb2xsZWdlLg0KMy4gQWNjZXB0OiBUaGUgbnVtYmVyIG9mIGFwcGxpY2F0aW9ucyBhY2NlcHRlZCBieSB0aGUgY29sbGVnZS4NCjQuIEVucm9sbDogVGhlIG51bWJlciBvZiBzdHVkZW50cyBlbnJvbGxlZCBhdCB0aGUgY29sbGVnZS4NCjUuIFRvcDEwcGVyYzogVGhlIHBlcmNlbnRhZ2Ugb2Ygc3R1ZGVudHMgYXQgdGhlIGNvbGxlZ2Ugd2hvIHNjb3JlZCBpbiB0aGUgdG9wIDEwJSBvZiB0aGVpciBoaWdoIHNjaG9vbCBjbGFzc2VzLg0KNi4gVG9wMjVwZXJjOiBUaGUgcGVyY2VudGFnZSBvZiBzdHVkZW50cyBhdCB0aGUgY29sbGVnZSB3aG8gc2NvcmVkIGluIHRoZSB0b3AgMjUlIG9mIHRoZWlyIGhpZ2ggc2Nob29sIGNsYXNzZXMuDQo3LiBGLlVuZGVyZ3JhZDogVGhlIG51bWJlciBvZiBmdWxsIHRpbWUgdW5kZXJncmFkdWF0ZXMgYXQgdGhlIGNvbGxlZ2UuDQo4LiBQLlVuZGVyZ3JhZDogVGhlIG51bWJlciBvZiBwYXJ0IHRpbWUgdW5kZXJncmFkdWF0ZXMgYXQgdGhlIGNvbGxlZ2UuDQo5LiBPdXRzdGF0ZTogVGhlIG91dC1vZi1zdGF0ZSB0dWl0aW9uIGZvciB0aGUgY29sbGVnZS4NCjEwLiBSb29tLkJvYXJkOiBUaGUgY29zdCBvZiByb29tIGFuZCBib2FyZCBhdCB0aGUgY29sbGVnZS4NCjExLiBCb29rczogVGhlIGVzdGltYXRlZCBjb3N0IG9mIGJvb2tzIGZvciBhIHllYXIgb2Ygc3R1ZHkgYXQgdGhlIGNvbGxlZ2UuDQoxMi4gUGVyc29uYWw6IFRoZSBlc3RpbWF0ZWQgcGVyc29uYWwgZXhwZW5zZXMgZm9yIGEgeWVhciBvZiBzdHVkeSBhdCB0aGUgY29sbGVnZS4NCjEzLiBQaEQ6IFRoZSBwZXJjZW50YWdlIG9mIGZhY3VsdHkgYXQgdGhlIGNvbGxlZ2Ugd2l0aCBQaERzLg0KMTQuIFRlcm1pbmFsOiBUaGUgcGVyY2VudGFnZSBvZiBmYWN1bHR5IGF0IHRoZSBjb2xsZWdlIHdpdGggdGVybWluYWwgZGVncmVlcw0KMTUuIFMuRi5SYXRpbzogVGhlIHN0dWRlbnQgdG8gZmFjdWx0eSByYXRpbyBhdCB0aGUgY29sbGVnZS4NCjE2LiBwZXJjLmFsdW1uaTogVGhlIHBlcmNlbnRhZ2Ugb2YgYWx1bW5pIHdobyBkb25hdGUgdG8gdGhlIGNvbGxlZ2UuDQoxNy4gRXhwZW5kOiBUaGUgaW5zdHJ1Y3Rpb25hbCBleHBlbmRpdHVyZSBwZXIgc3R1ZGVudCBhdCB0aGUgY29sbGVnZS4NCjE4LiBHcmFkLlJhdGU6IFRoZSBncmFkdWF0aW9uIHJhdGUgZm9yIHRoZSBjb2xsZWdlLg0KDQpTb21lIHJlcHJlc2VudGF0aW9uIGRlY2lzaW9ucyB3ZXJlIG1hZGUgd2hlbiBjcmVhdGluZyB0aGlzIGRhdGFzZXQuIEZvciBleGFtcGxlLCB0aGUgUHJpdmF0ZSBjb2x1bW4gd2FzIGNvZGVkIGFzIGEgZmFjdG9yIHdpdGggdHdvIGxldmVscywgIlllcyIgYW5kICJObywiIHJhdGhlciB0aGFuIGEgbnVtZXJpY2FsIHZhbHVlLiBUaGlzIGRlY2lzaW9uIHdhcyBtYWRlIHRvIGF2b2lkIGlzc3VlcyB3aXRoIGNvbXBhcmluZyBwcml2YXRlIGFuZCBwdWJsaWMgY29sbGVnZXMgYmFzZWQgb24gY29zdCwgYWRtaXNzaW9uIHJhdGVzLCBvciBvdGhlciBmYWN0b3JzLiBBbHNvLCB0aGUgUGguRC4gYW5kIFRlcm1pbmFsIGNvbHVtbnMgd2VyZSByZXByZXNlbnRlZCBhcyBwZXJjZW50YWdlcyByYXRoZXIgdGhhbiBudW1iZXJzIHRvIHByb3ZpZGUgYSBiZXR0ZXIgcmVwcmVzZW50YXRpb24gb2YgdGhlIGZhY3VsdHkncyBxdWFsaWZpY2F0aW9ucy4NCg0KDQojDQoqKlF1ZXN0aW9ucyoqDQoNCk15IG9iamVjdGl2ZSBpcyB0byBleHBsb3JlIHdoYXQgZmFjdG9ycyBhcmUgbW9zdCBjb3JyZWxhdGVkIHdpdGggYSBjb2xsZWdlJ3MgZ3JhZHVhdGlvbiByYXRlIGFzIHdlbGwgYXMgdG8gYmUgYWJsZSB0byBwcmVkaWN0IGFjY3VyYXRlbHkgYSBuZXcgY29sbGVnZXMgZ3JhZHVhdGlvbiByYXRlIGdpdmVuIHNvbWUgZGF0YS4gVGhpcyBhbmFseXNpcyB3aWxsIG9mZmVyIGluc2lnaHRzIGludG8gdGhlIHN0YXRlIG9mIGhpZ2hlciBlZHVjYXRpb24gaW4gdGhlIFVTIGFuZCBpZGVudGlmeSB3aGF0IGlzIGJlaW5nIHBhaWQgZm9yLiBUaGUgcmVzdWx0cyBvZiBteSBzdHVkeSBjb3VsZCBiZSB1c2VmdWwgZm9yIG90aGVycyB3aG8gYXJlIGxvb2tpbmcgdG8gY2hvb3NlIHRoZSBiZXN0IGNvbGxlZ2UgZm9yIHRoZWlyIG5lZWRzLg0KDQoqKlZpc3VhbGl6YXRpb24qKg0KDQpUbyB1bmRlcnN0YW5kIGFuZCBnYWluIGluc2lnaHRzIGludG8gcGF0dGVybnMgYW5kIHRyZW5kcyB3aXRoaW4gdGhlIGRhdGEgdGhhdCBhcmUgbm90IGltbWVkaWF0ZWx5IHZpc2libGUgaXRzIGltcG9ydGFudCB0byB2aXN1YWxpemUgb3VyIGRhdGEuIFdlIGZpcnN0IGNhbiBsb2FkIHVwIGFsbCBvZiBvdXIgbGlicmFyaWVzIHdlIHdpbGwgbmVlZCBhbmQgY29udmVydCBhbGwgdGhlIHF1YW50aXRhdGl2ZSBkYXRhIGludG8gcXVhbGl0YXRpdmUgdXNpbmcgdGhpcyBhbmQgc2F2aW5nIGl0IGludG8gdGhlIENvbGxlZ2VfZGF0YSB2YXJpYWJsZS4NCg0KYGBge3J9DQpsaWJyYXJ5KElTTFIyKQ0KbGlicmFyeShnZ3Bsb3QyKQ0KbGlicmFyeShkcGx5cikNCmxpYnJhcnkoZ2xtbmV0KQ0KbGlicmFyeShjYXJldCkNCg0KQ29sbGVnZV9kYXRhID0gQ29sbGVnZV9xdWFudF9kYXRhIDwtIG5hLm9taXQoQ29sbGVnZSkgJT4lDQogIG11dGF0ZV9hbGwofiBpZihpcy5mYWN0b3IoLikpIHsNCiAgICBhcy5udW1lcmljKGFzLmZhY3RvciguKSkNCiAgfSBlbHNlIHsNCiAgICAuDQogIH0pDQpgYGANCg0KV2UgY2FuIHRoZW4gc3RhcnQgdG8gdmlzdWFsaXplIG91ciBkYXRhIGJ5IGNyZWF0aW5nIGEgc2NhdHRlciBwbG90IG1hdHJpY2VzIGZvciBlYWNoIHZhcmlhYmxlIHdlIGFyZSBpbnZlc3RpZ2F0aW5nIGJldHdlZW4gYWxsIG90aGVyIHZhcmlhYmxlcyBhcyB3ZWxsIGFzIGxpc3RpbmcgdGhlaXIgY29ycmVsYXRpb25zLg0KDQpGaXJzdCB3ZSB3aWxsIHN0YXJ0IHdpdGggdmlzdWFsaXppbmcgdGhlIHNjYXR0ZXIgcGxvdHMgZm9yIHRoZSBHcmFkdWF0aW9uIFJhdGUgdG8gc2VlIGlmIHRoZXJlJ3MgYW55IHZpc3VhbCBjb3JyZWxhdGlvbnMgdGhlcmUuDQoNCmBgYHtyfQ0KcGFyKG1mcm93ID0gYygzLCAzKSkNCg0KY29sbmFtZXMgPC0gbmFtZXMoQ29sbGVnZV9kYXRhKQ0KDQpmb3IgKGkgaW4gMjpsZW5ndGgoY29sbmFtZXMpIC0gMSkgew0KICAjIG1ha2Ugc2NhdHRlciBwbG90IG9mIEdyYWQuUmF0ZSBhZ2FpbnN0IHRoZSBjdXJyZW50IHByZWRpY3Rvcg0KICBwbG90KENvbGxlZ2VbLGldLCBDb2xsZWdlJEdyYWQuUmF0ZSwgeGxhYiA9IGNvbG5hbWVzW2ldLCB5bGFiID0gIkdyYWQuUmF0ZSIpDQp9DQpjb3IoQ29sbGVnZV9kYXRhKVstIHdoaWNoKGNvbG5hbWVzKENvbGxlZ2UpID09ICJHcmFkLlJhdGUiKSwgIkdyYWQuUmF0ZSJdICMgcHJpbnQgb3V0IGNvcnJlbGF0aW9ucyBleGNlcHQgdGhlIGdyYWQgdG8gZ3JhZA0KYGBgDQoNCkFuYWx5emluZyB0aGUgZ3JhcGhzIGFuZCB0aGUgY29ycmVsYXRpb25zIHdlIGNhbiBzZWUgdGhhdCB0aGUgUHJpdmF0ZSwgVG9wMTBwZXJjLCBUb3AyMHByZWMsIE91dHN0YXRlLCBSb29tLkJvYXJkLCBwaEQsIFMuRi5SYXRpbywgcGVyYy5hbHVtbmkgYW5kIEV4cGVuZCBoYXZlIGV2aWRlbmNlIG9mIGJlaW5nIG1vZGVyYXRlbHkgY29ycmVsYXRlZCB3aXRoIHRoZSBHcmFkdWF0aW9uIFJhdGUuIFVzaW5nIHRoaXMgaW5mb3JtYXRpb24gd2UgY2FuIGh5cG90aGVzaXplIGJlZm9yZSB3ZSBmaXQgb3VyIG1vZGVsIHRoYXQgc29tZSBvZiB0aGVzZSB2YXJpYWJsZXMgY2FuIGJlIHJlbGF0ZWQgdG8gR3JhZHVhdGlvbiByYXRlLg0KDQoqKk1vZGVsaW5nKioNCg0KVG8gYWNoaWV2ZSBteSBnb2FsLCBJIHBsYW4gdG8gZmlyc3QgdXNlIGEgbGluZWFyIHJlZ3Jlc3Npb24gbW9kZWwgdG8gcHJlZGljdCB0aGUgcXVhbGl0YXRpdmUgcmVzcG9uc2VzLiBJIHdpbGwgYWxzbyBleHBlcmltZW50IHdpdGggdXNpbmcgcmFuZG9tIGZvcmVzdHMgYW5kIGRlY2lzaW9uIHRyZWVzLiBJIGFsc28gcGxhbiB0byBhcHBseSBrLWZvbGQgY3Jvc3MtdmFsaWRhdGlvbiBhbmQgTGFzc28gdG8gZW5zdXJlIHRoZSB2YWxpZGl0eSBvZiBteSBtb2RlbCwgc3BlY2lmaWNhbGx5IHVzaW5nIHRoZSBMYXNzbyBtZXRob2QgYXMgSSBhbnRpY2lwYXRlIHRoYXQgbm90IGFsbCB2YXJpYWJsZXMgd2lsbCBiZSBsaW5rZWQgdG8gdGhlIHJlc3BvbnNlLg0KDQpUbyBzdGFydCB3ZSBkaXZpZGUgdGhlIGRhdGEgdG8gYmUgNzAlIHRyYWluaW5nIGFuZCAzMCUgdGVzdGluZy4NCg0KYGBge3J9DQpzZXQuc2VlZCg1KSANCg0KYWxwaGEgPSAxDQprID0gMTANCmxhbWJkYSA9IDEwXnNlcSgxMCwgLTIsIGxlbmd0aCA9IDEwMCkNCg0KIyBEaXZpZGUgdGhlIGRhdGEgaW50byB0cmFpbmluZyBhbmQgdGVzdA0KeCA9IG1vZGVsLm1hdHJpeChHcmFkLlJhdGUgfiAuLCBkYXRhID0gQ29sbGVnZV9kYXRhKVssIC0xXQ0KeSA9IENvbGxlZ2VfZGF0YSRHcmFkLlJhdGUNCg0KdHJhaW4gPSBzYW1wbGUoMTpucm93KHgpLCAwLjcqbnJvdyh4KSkgIyA3MCUgdHJhaW5pbmcgZGF0YQ0KdGVzdCA9ICgtdHJhaW4pDQp5LnRlc3QgPC0geVt0ZXN0XQ0KYGBgDQoNClRoZW4gdXNpbmcgdGhlc2UgdHdvIHNldHMgb2YgZGF0YSB3ZSBjYW4gZml0IGEgbGluZWFyIHJlZ3Jlc3Npb24gbW9kZWwgdXNpbmcgay1mb2xkcyBhbmQgTGFzc28gdG8gcHJlZGljdCB0aGUgR3JhZHVhdGlvbiByYXRlLg0KDQpgYGB7cn0NCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIEZpdCBvbiB0cmFpbmluZyBkYXRhDQpzaHJpbmsubW9kIDwtIGdsbW5ldCh4W3RyYWluLF0sIHlbdHJhaW5dLCBhbHBoYSA9IGFscGhhLCBsYW1iZGEgPSBsYW1iZGEsIGZhbWlseT0iZ2F1c3NpYW4iKQ0KDQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIHByZWZvcm0gY3Jvc3MgdmFsaWRhdGlvbiB0byBnZXQgdGhlIGJlc3QgbGFtYmRhDQoNCmN2Lm91dCA9IGN2LmdsbW5ldCh4W3RyYWluLF0sIHlbdHJhaW5dLCBhbHBoYT1hbHBoYSwgbmZvbGRzPWssIGZhbWlseT0iZ2F1c3NpYW4iKQ0KYmVzdGxhbSA9IGN2Lm91dCRsYW1iZGEubWluDQoNCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIEdlbmVyYWxpemF0aW9uIEVycm9yDQpzaHJpbmsucHJlZCA8LSBwcmVkaWN0KHNocmluay5tb2QgLCBzID0gYmVzdGxhbSAsIG5ld3ggPSB4W3Rlc3QsIF0sIGZhbWlseT0iZ2F1c3NpYW4iKQ0KDQpNU0UgPSAgbWVhbigoc2hyaW5rLnByZWQgLSB5LnRlc3QpXjIpDQoNCm1lc3NhZ2Uoc3ByaW50ZigiVGhlIE1lYW4gU3F1YXJlZCBlcnJvciBpcyAlZiIsIE1TRSkpDQpgYGANCg0KTm93IHdlIGRvIGl0IHdpdGggYSBkZWNpc2lvbiB0cmVlIHdpdGggY3Jvc3MgdmFsaWRhdGlvbi4NCg0KYGBge3J9DQojIFRoaXMgdGltZSBwYXJ0aXRpb24gb3VyIGRhdGEgdXNpbmcgaW5kZXhpbmcNCnRyYWluSW5kZXggPC0gY3JlYXRlRGF0YVBhcnRpdGlvbihDb2xsZWdlX2RhdGEkR3JhZC5SYXRlLCBwID0gMC43LCBsaXN0ID0gRkFMU0UpDQp0cmFpbmluZyA8LSBDb2xsZWdlX2RhdGFbdHJhaW5JbmRleCwgXQ0KdGVzdGluZyA8LSBDb2xsZWdlX2RhdGFbLXRyYWluSW5kZXgsIF0NCg0KbGlicmFyeShycGFydCkNCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIEZpdCBhIGRlY2lzaW9uIHRyZWUgb24gdGhlIHRyYWluaW5nIGRhdGENCmZpdC50cmVlID0gcnBhcnQoR3JhZC5SYXRlIH4gLiwgZGF0YT10cmFpbmluZykNCg0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KIyBwcmVmb3JtIGNyb3NzIHZhbGlkYXRpb24gdG8gZ2V0IHRoZSBiZXN0IGZpdA0KDQpjdiA9IHRyYWluQ29udHJvbChtZXRob2QgPSAiY3YiLCBudW1iZXIgPSAxMCkNCmN2LmZpdCA9IHRyYWluKEdyYWQuUmF0ZSB+IC4sIGRhdGEgPSB0cmFpbmluZywgbWV0aG9kID0gInJwYXJ0IiwgdHJDb250cm9sID0gY3YpDQoNCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIEdlbmVyYWxpemF0aW9uIGVycm9yDQoNCnByZWQgPSBwcmVkaWN0KGZpdC50cmVlLCB0ZXN0aW5nKQ0KbXNlVHJlZSA9IG1lYW4oKHByZWQgLSB0ZXN0aW5nJEdyYWQuUmF0ZSleMikNCg0KcHJlZCA9IHByZWRpY3QoY3YuZml0LCB0ZXN0aW5nKQ0KbXNlQ3Jvc3NUcmVlID0gbWVhbigocHJlZCAtIHRlc3RpbmckR3JhZC5SYXRlKV4yKQ0KDQpzdW1tYXJ5KGZpdC50cmVlKQ0KbWVzc2FnZShzcHJpbnRmKCJUaGUgTWVhbiBTcXVhcmVkIGVycm9yIG9mIHRoZSBkZWNpc2lvbiB0cmVlIGlzICVmIiwgbXNlVHJlZSkpDQptZXNzYWdlKHNwcmludGYoIlRoZSBNZWFuIFNxdWFyZWQgZXJyb3Igb2YgdGhlIGstZm9sZCBjcm9zcyB2YWxpZGF0aW9uIGRlY2lzaW9uIHRyZWUgaXMgJWYiLCBtc2VDcm9zc1RyZWUpKQ0KYGBgDQoNCioqUmVzdWx0cyoqDQoNClRoaXMgcHJvamVjdCB3aWxsIHByb3ZpZGUgdmFsdWFibGUgaW5zaWdodHMgaW50byB0aGUgY29ycmVsYXRpb24gYmV0d2VlbiBkaWZmZXJlbnQgZmFjdG9ycyBhbmQgdGhlIHBlcmZvcm1hbmNlIG9mIFVTIGNvbGxlZ2VzLiBUaHJvdWdoIHRoZSB1c2Ugb2Ygc3RhdGlzdGljYWwgYW5hbHlzaXMgYW5kIG1hY2hpbmUgbGVhcm5pbmcgdGVjaG5pcXVlcywgSSBhaW0gdG8gZGV0ZXJtaW5lIHdoaWNoIHZhcmlhYmxlcyBhcmUgbW9zdCBzaWduaWZpY2FudCBhbmQgcHJvdmlkZSByZWNvbW1lbmRhdGlvbnMgZm9yIHN0dWRlbnRzIHdobyBhcmUgc2Vla2luZyB0byBzZWxlY3QgdGhlIGJlc3QgY29sbGVnZSBmb3IgdGhlaXIgbmVlZHMu</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNTIDY3MCBGaW5hbCBQcm9qZWN0IFIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KPGgxIHN0eWxlPSJmb250LXNpemU6IDMwcHg7Ij5JbnRyb2R1Y3Rpb248L2gxPg0KDQpGb3IgbXkgcHJvamVjdCwgSSBwbGFuIHRvIHdvcmsgd2l0aCB0aGUgQ29sbGVnZSBkYXRhc2V0IGxvY2F0ZWQgaW4gdGhlIElTTFIyIGxpYnJhcnkgY3JlYXRlZCBieSB0aGUgYXV0aG9ycyBvZiB0aGUgYm9vayAiQW4gSW50cm9kdWN0aW9uIHRvIFN0YXRpc3RpY2FsIExlYXJuaW5nIHdpdGggQXBwbGljYXRpb25zIGluIFIiLiBUaGlzIGRhdGFzZXQgd2FzIGNvbGxlY3RlZCBieSBzYW1wbGluZyBpbmZvcm1hdGlvbiBmcm9tIDc3NyBjb2xsZWdlcyBmcm9tIHRoZSAxOTk1IGlzc3VlIG9mIFVTIE5ld3MgYW5kIFdvcmxkIFJlcG9ydCB3aGljaCBpcyBhIG5ld3MgbWFnYXppbmUgdGhhdCBwdWJsaXNoZXMgcmFua2luZ3Mgb2YgY29sbGVnZXMgd2l0aGluIHRoZSBVUy4gVGhlIHB1cnBvc2Ugb2YgY29sbGVjdGluZyB0aGlzIGRhdGEgd2FzIHRvIHByb3ZpZGUgYSByZXNvdXJjZSBmb3Igc3R1ZGVudHMgYW5kIHJlc2VhcmNoZXJzIHRvIGV4cGxvcmUgdGhlIGNvcnJlbGF0aW9uIGJldHdlZW4gZGlmZmVyZW50IGZhY3RvcnMgYW5kIHRoZSBwZXJmb3JtYW5jZSBvZiBVUyBjb2xsZWdlcy4gRWFjaCBjb2xsZWdlIGlzIHJlcHJlc2VudGVkIGluIDE4IGRpZmZlcmVudCBjb2x1bW5zIGNvbnRhaW5pbmcgc3RhdGlzdGljcyBvbiB2YXJpb3VzIGFzcGVjdHMgb2YgdGhhdCBjb2xsZWdlIHdoaWNoIGluY2x1ZGU6DQoNCjEuIFByaXZhdGU6IEEgZmFjdG9yIGluZGljYXRpbmcgd2hldGhlciB0aGUgY29sbGVnZSBpcyBwcml2YXRlIG9yIHB1YmxpYy4NCjIuIEFwcHM6IFRoZSBudW1iZXIgb2YgYXBwbGljYXRpb25zIHJlY2VpdmVkIGJ5IHRoZSBjb2xsZWdlLg0KMy4gQWNjZXB0OiBUaGUgbnVtYmVyIG9mIGFwcGxpY2F0aW9ucyBhY2NlcHRlZCBieSB0aGUgY29sbGVnZS4NCjQuIEVucm9sbDogVGhlIG51bWJlciBvZiBzdHVkZW50cyBlbnJvbGxlZCBhdCB0aGUgY29sbGVnZS4NCjUuIFRvcDEwcGVyYzogVGhlIHBlcmNlbnRhZ2Ugb2Ygc3R1ZGVudHMgYXQgdGhlIGNvbGxlZ2Ugd2hvIHNjb3JlZCBpbiB0aGUgdG9wIDEwJSBvZiB0aGVpciBoaWdoIHNjaG9vbCBjbGFzc2VzLg0KNi4gVG9wMjVwZXJjOiBUaGUgcGVyY2VudGFnZSBvZiBzdHVkZW50cyBhdCB0aGUgY29sbGVnZSB3aG8gc2NvcmVkIGluIHRoZSB0b3AgMjUlIG9mIHRoZWlyIGhpZ2ggc2Nob29sIGNsYXNzZXMuDQo3LiBGLlVuZGVyZ3JhZDogVGhlIG51bWJlciBvZiBmdWxsIHRpbWUgdW5kZXJncmFkdWF0ZXMgYXQgdGhlIGNvbGxlZ2UuDQo4LiBQLlVuZGVyZ3JhZDogVGhlIG51bWJlciBvZiBwYXJ0IHRpbWUgdW5kZXJncmFkdWF0ZXMgYXQgdGhlIGNvbGxlZ2UuDQo5LiBPdXRzdGF0ZTogVGhlIG91dC1vZi1zdGF0ZSB0dWl0aW9uIGZvciB0aGUgY29sbGVnZS4NCjEwLiBSb29tLkJvYXJkOiBUaGUgY29zdCBvZiByb29tIGFuZCBib2FyZCBhdCB0aGUgY29sbGVnZS4NCjExLiBCb29rczogVGhlIGVzdGltYXRlZCBjb3N0IG9mIGJvb2tzIGZvciBhIHllYXIgb2Ygc3R1ZHkgYXQgdGhlIGNvbGxlZ2UuDQoxMi4gUGVyc29uYWw6IFRoZSBlc3RpbWF0ZWQgcGVyc29uYWwgZXhwZW5zZXMgZm9yIGEgeWVhciBvZiBzdHVkeSBhdCB0aGUgY29sbGVnZS4NCjEzLiBQaEQ6IFRoZSBwZXJjZW50YWdlIG9mIGZhY3VsdHkgYXQgdGhlIGNvbGxlZ2Ugd2l0aCBQaERzLg0KMTQuIFRlcm1pbmFsOiBUaGUgcGVyY2VudGFnZSBvZiBmYWN1bHR5IGF0IHRoZSBjb2xsZWdlIHdpdGggdGVybWluYWwgZGVncmVlcw0KMTUuIFMuRi5SYXRpbzogVGhlIHN0dWRlbnQgdG8gZmFjdWx0eSByYXRpbyBhdCB0aGUgY29sbGVnZS4NCjE2LiBwZXJjLmFsdW1uaTogVGhlIHBlcmNlbnRhZ2Ugb2YgYWx1bW5pIHdobyBkb25hdGUgdG8gdGhlIGNvbGxlZ2UuDQoxNy4gRXhwZW5kOiBUaGUgaW5zdHJ1Y3Rpb25hbCBleHBlbmRpdHVyZSBwZXIgc3R1ZGVudCBhdCB0aGUgY29sbGVnZS4NCjE4LiBHcmFkLlJhdGU6IFRoZSBncmFkdWF0aW9uIHJhdGUgZm9yIHRoZSBjb2xsZWdlLg0KDQpTb21lIHJlcHJlc2VudGF0aW9uIGRlY2lzaW9ucyB3ZXJlIG1hZGUgd2hlbiBjcmVhdGluZyB0aGlzIGRhdGFzZXQuIEZvciBleGFtcGxlLCB0aGUgUHJpdmF0ZSBjb2x1bW4gd2FzIGNvZGVkIGFzIGEgZmFjdG9yIHdpdGggdHdvIGxldmVscywgIlllcyIgYW5kICJObywiIHJhdGhlciB0aGFuIGEgbnVtZXJpY2FsIHZhbHVlLiBUaGlzIGRlY2lzaW9uIHdhcyBtYWRlIHRvIGF2b2lkIGlzc3VlcyB3aXRoIGNvbXBhcmluZyBwcml2YXRlIGFuZCBwdWJsaWMgY29sbGVnZXMgYmFzZWQgb24gY29zdCwgYWRtaXNzaW9uIHJhdGVzLCBvciBvdGhlciBmYWN0b3JzLiBBbHNvLCB0aGUgUGguRC4gYW5kIFRlcm1pbmFsIGNvbHVtbnMgd2VyZSByZXByZXNlbnRlZCBhcyBwZXJjZW50YWdlcyByYXRoZXIgdGhhbiBudW1iZXJzIHRvIHByb3ZpZGUgYSBiZXR0ZXIgcmVwcmVzZW50YXRpb24gb2YgdGhlIGZhY3VsdHkncyBxdWFsaWZpY2F0aW9ucy4NCg0KPGgxIHN0eWxlPSJmb250LXNpemU6IDMwcHg7Ij5RdWVzdGlvbnM8L2gxPg0KDQpNeSBvYmplY3RpdmUgaXMgdG8gZXhwbG9yZSB3aGF0IGZhY3RvcnMgYXJlIG1vc3QgY29ycmVsYXRlZCB3aXRoIGEgY29sbGVnZSdzIGdyYWR1YXRpb24gcmF0ZSBhcyB3ZWxsIGFzIHRvIGJlIGFibGUgdG8gcHJlZGljdCBhY2N1cmF0ZWx5IGEgbmV3IGNvbGxlZ2VzIGdyYWR1YXRpb24gcmF0ZSBnaXZlbiBzb21lIGRhdGEuIFRoaXMgYW5hbHlzaXMgd2lsbCBvZmZlciBpbnNpZ2h0cyBpbnRvIHRoZSBzdGF0ZSBvZiBoaWdoZXIgZWR1Y2F0aW9uIGluIHRoZSBVUyBhbmQgaWRlbnRpZnkgd2hhdCBpcyBiZWluZyBwYWlkIGZvci4gVGhlIHJlc3VsdHMgb2YgbXkgc3R1ZHkgY291bGQgYmUgdXNlZnVsIGZvciBvdGhlcnMgd2hvIGFyZSBsb29raW5nIHRvIGNob29zZSB0aGUgYmVzdCBjb2xsZWdlIGZvciB0aGVpciBuZWVkcy4NCg0KPGgxIHN0eWxlPSJmb250LXNpemU6IDMwcHg7Ij5WaXN1YWxpemF0aW9uPC9oMT4NCg0KVG8gdW5kZXJzdGFuZCBhbmQgZ2FpbiBpbnNpZ2h0cyBpbnRvIHBhdHRlcm5zIGFuZCB0cmVuZHMgd2l0aGluIHRoZSBkYXRhIHRoYXQgYXJlIG5vdCBpbW1lZGlhdGVseSB2aXNpYmxlIGl0cyBpbXBvcnRhbnQgdG8gdmlzdWFsaXplIG91ciBkYXRhLiBXZSBmaXJzdCBjYW4gbG9hZCB1cCBhbGwgb2Ygb3VyIGxpYnJhcmllcyB3ZSB3aWxsIG5lZWQgYW5kIGNvbnZlcnQgYWxsIHRoZSBxdWFudGl0YXRpdmUgZGF0YSBpbnRvIHF1YWxpdGF0aXZlIHVzaW5nIHRoaXMgYW5kIHNhdmluZyBpdCBpbnRvIHRoZSBDb2xsZWdlX2RhdGEgdmFyaWFibGUuDQoNCmBgYHtyfQ0KbGlicmFyeShJU0xSMikNCmxpYnJhcnkoZ2dwbG90MikNCmxpYnJhcnkoZHBseXIpDQpsaWJyYXJ5KGdsbW5ldCkNCmxpYnJhcnkoY2FyZXQpDQoNCkNvbGxlZ2VfZGF0YSA9IENvbGxlZ2VfcXVhbnRfZGF0YSA8LSBuYS5vbWl0KENvbGxlZ2UpICU+JQ0KICBtdXRhdGVfYWxsKH4gaWYoaXMuZmFjdG9yKC4pKSB7DQogICAgYXMubnVtZXJpYyhhcy5mYWN0b3IoLikpDQogIH0gZWxzZSB7DQogICAgLg0KICB9KQ0KYGBgDQoNCldlIGNhbiB0aGVuIHN0YXJ0IHRvIHZpc3VhbGl6ZSBvdXIgZGF0YSBieSBjcmVhdGluZyBhIHNjYXR0ZXIgcGxvdCBtYXRyaWNlcyBmb3IgZWFjaCB2YXJpYWJsZSB3ZSBhcmUgaW52ZXN0aWdhdGluZyBiZXR3ZWVuIGFsbCBvdGhlciB2YXJpYWJsZXMgYXMgd2VsbCBhcyBsaXN0aW5nIHRoZWlyIGNvcnJlbGF0aW9ucy4NCg0KRmlyc3Qgd2Ugd2lsbCBzdGFydCB3aXRoIHZpc3VhbGl6aW5nIHRoZSBzY2F0dGVyIHBsb3RzIGZvciB0aGUgR3JhZHVhdGlvbiBSYXRlIHRvIHNlZSBpZiB0aGVyZSdzIGFueSB2aXN1YWwgY29ycmVsYXRpb25zIHRoZXJlLg0KDQpgYGB7cn0NCnBhcihtZnJvdyA9IGMoMywgMykpDQoNCmNvbG5hbWVzIDwtIG5hbWVzKENvbGxlZ2VfZGF0YSkNCg0KZm9yIChpIGluIDI6bGVuZ3RoKGNvbG5hbWVzKSAtIDEpIHsNCiAgIyBtYWtlIHNjYXR0ZXIgcGxvdCBvZiBHcmFkLlJhdGUgYWdhaW5zdCB0aGUgY3VycmVudCBwcmVkaWN0b3INCiAgcGxvdChDb2xsZWdlWyxpXSwgQ29sbGVnZSRHcmFkLlJhdGUsIHhsYWIgPSBjb2xuYW1lc1tpXSwgeWxhYiA9ICJHcmFkLlJhdGUiKQ0KfQ0KY29yKENvbGxlZ2VfZGF0YSlbLSB3aGljaChjb2xuYW1lcyhDb2xsZWdlKSA9PSAiR3JhZC5SYXRlIiksICJHcmFkLlJhdGUiXSAjIHByaW50IG91dCBjb3JyZWxhdGlvbnMgZXhjZXB0IHRoZSBncmFkIHRvIGdyYWQNCmBgYA0KDQpBbmFseXppbmcgdGhlIGdyYXBocyBhbmQgdGhlIGNvcnJlbGF0aW9ucyB3ZSBjYW4gc2VlIHRoYXQgdGhlIFByaXZhdGUsIFRvcDEwcGVyYywgVG9wMjBwcmVjLCBPdXRzdGF0ZSwgUm9vbS5Cb2FyZCwgcGhELCBTLkYuUmF0aW8sIHBlcmMuYWx1bW5pIGFuZCBFeHBlbmQgaGF2ZSBldmlkZW5jZSBvZiBiZWluZyBtb2RlcmF0ZWx5IGNvcnJlbGF0ZWQgd2l0aCB0aGUgR3JhZHVhdGlvbiBSYXRlLiBVc2luZyB0aGlzIGluZm9ybWF0aW9uIHdlIGNhbiBoeXBvdGhlc2l6ZSBiZWZvcmUgd2UgZml0IG91ciBtb2RlbCB0aGF0IHNvbWUgb2YgdGhlc2UgdmFyaWFibGVzIGNhbiBiZSByZWxhdGVkIHRvIEdyYWR1YXRpb24gcmF0ZS4NCg0KPGgxIHN0eWxlPSJmb250LXNpemU6IDMwcHg7Ij5Nb2RlbGluZzwvaDE+DQoNClRvIGFjaGlldmUgbXkgZ29hbCwgSSBwbGFuIHRvIGZpcnN0IHVzZSBhIGxpbmVhciByZWdyZXNzaW9uIG1vZGVsIHRvIHByZWRpY3QgdGhlIHF1YWxpdGF0aXZlIHJlc3BvbnNlcy4gSSB3aWxsIGFsc28gZXhwZXJpbWVudCB3aXRoIHVzaW5nIHJhbmRvbSBmb3Jlc3RzIGFuZCBkZWNpc2lvbiB0cmVlcy4gSSBhbHNvIHBsYW4gdG8gYXBwbHkgay1mb2xkIGNyb3NzLXZhbGlkYXRpb24gYW5kIExhc3NvIHRvIGVuc3VyZSB0aGUgdmFsaWRpdHkgb2YgbXkgbW9kZWwsIHNwZWNpZmljYWxseSB1c2luZyB0aGUgTGFzc28gbWV0aG9kIGFzIEkgYW50aWNpcGF0ZSB0aGF0IG5vdCBhbGwgdmFyaWFibGVzIHdpbGwgYmUgbGlua2VkIHRvIHRoZSByZXNwb25zZS4NCg0KVG8gc3RhcnQgd2UgZGl2aWRlIHRoZSBkYXRhIHRvIGJlIDcwJSB0cmFpbmluZyBhbmQgMzAlIHRlc3RpbmcuDQoNCmBgYHtyfQ0Kc2V0LnNlZWQoMCkgDQoNCmFscGhhID0gMQ0KayA9IDEwDQpsYW1iZGEgPSAxMF5zZXEoMTAsIC0yLCBsZW5ndGggPSAxMDApDQoNCiMgRGl2aWRlIHRoZSBkYXRhIGludG8gdHJhaW5pbmcgYW5kIHRlc3QNCnggPSBtb2RlbC5tYXRyaXgoR3JhZC5SYXRlIH4gLiwgZGF0YSA9IENvbGxlZ2VfZGF0YSlbLCAtMV0NCnkgPSBDb2xsZWdlX2RhdGEkR3JhZC5SYXRlDQoNCnRyYWluSW5kZXggPSBjcmVhdGVEYXRhUGFydGl0aW9uKENvbGxlZ2VfZGF0YSRHcmFkLlJhdGUsIHAgPSAwLjcsIGxpc3QgPSBGQUxTRSkNCnRyYWluaW5nID0gbmEub21pdChDb2xsZWdlX2RhdGFbdHJhaW5JbmRleCwgXSkNCnRlc3RpbmcgPSBuYS5vbWl0KENvbGxlZ2VfZGF0YVstdHJhaW5JbmRleCwgXSkNCmBgYA0KDQo8aDEgc3R5bGU9ImZvbnQtc2l6ZTogMThweDsiPioqTGluZWFyIFJlZ3Jlc3Npb24qKjwvaDE+DQoNClRoZW4gdXNpbmcgdGhlc2UgdHdvIHNldHMgb2YgZGF0YSB3ZSBjYW4gZml0IGEgbGluZWFyIHJlZ3Jlc3Npb24gbW9kZWwgdXNpbmcgay1mb2xkcyBhbmQgTGFzc28gdG8gcHJlZGljdCB0aGUgR3JhZHVhdGlvbiByYXRlLiBJIHdpbGwgYWxzbyBmaXQgYSBub3JtYWwgbGluZWFyIHJlZ3Jlc3Npb24gb24gdGhlIHRyYWluaW5nIGRhdGEgc28gd2UgY2FuIGluZmVyIHRoZSByZWxhdGlvbnNoaXBzIGJldHdlZW4gdGhlIHByZWRpY3RvcnMgYW5kIHJlc3BvbnNlLCBhbmQgc2VlIGhvdyBtdWNoIHRoZSBtb2RlbHMgcGVyZm9ybWFuY2UgaW1wcm92ZXMgdXNpbmcgY3Jvc3MgdmFsaWRhdGlvbi4NCg0KYGBge3J9DQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KIyBGaXQgb24gdHJhaW5pbmcgZGF0YQ0KY3YgPSB0cmFpbkNvbnRyb2wobWV0aG9kID0gImN2IiwgbnVtYmVyID0gaykNCnNocmluay5tb2QgPSB0cmFpbihHcmFkLlJhdGUgfiAuLCBkYXRhID0gdHJhaW5pbmcsIG1ldGhvZCA9ICJnbG1uZXQiLCB0ckNvbnRyb2wgPSBjdikNCg0KbG0uZml0ID0gbG0oR3JhZC5SYXRlIH4gLiwgZGF0YT1Db2xsZWdlX2RhdGEpDQoNCiMgZ2xtbmV0IGlzIGxhc3NvDQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KIyBHZW5lcmFsaXphdGlvbiBFcnJvcg0KDQpzaHJpbmsucHJlZCA9IHByZWRpY3Qoc2hyaW5rLm1vZCwgdGVzdGluZykNCk1TRSA9ICBtZWFuKCh0ZXN0aW5nJEdyYWQuUmF0ZSAtIHNocmluay5wcmVkKV4yKQ0KDQpzaHJpbmsucHJlZCA9IHByZWRpY3QobG0uZml0LCB0ZXN0aW5nKQ0KTVNFbG0gPSAgbWVhbigodGVzdGluZyRHcmFkLlJhdGUgLSBzaHJpbmsucHJlZCleMikNCg0Kc3VtbWFyeShsbS5maXQpDQptZXNzYWdlKHNwcmludGYoIlRoZSBNZWFuIHNxdWFyZWQgZXJyb3Igb2YgdGhlIExpbmVhciBSZWdyZXNzaW9uIGlzICVmIiwgTVNFbG0pKQ0KDQojcGxvdChzaHJpbmsubW9kJGZpbmFsTW9kZWwsIHh2YXIgPSAibGFtYmRhIiwgbGFiZWwgPSBUUlVFKQ0KDQpzdW1tYXJ5KHNocmluay5tb2QkcmVzdWx0cykNCm1lc3NhZ2Uoc3ByaW50ZigiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgTGluZWFyIFJlZ3Jlc3Npb24gdXNpbmcgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gYW5kIExhc3NvIGlzICVmIiwgTVNFKSkNCmBgYA0KRm9yIG91ciBjcm9zcyB2YWxpZGF0ZWQgbGFzc28gcmVncmVzc2lvbiBtb2RlbCBmcm9tIHRoZSBzdGF0aXN0aWNzIHByaW50ZWQgYWJvdmUgd2UgY2FuIHNlZSB0aGF0IHRoYXQgdGhlIG9wdGltYWwgYWxwaGEgaXMgMC41NSBzdWdnZXN0aW5nIHdlIGFyZSBhcHBseWluZyBtb2RlcmF0ZSByZWd1bGFyaXphdGlvbiB3aXRoIHRoZSBvcHRpbWFsIGxhbWJkYSBmb3Igc2hyaW5rYWdlIGJlaW5nIH4wLjc0IHdoaWNoIHNob3dzIHRoYXQgdGhlIG1vZGVscyBoYXMgbWFueSBoaWdoIGNvZWZmaWNpZW50cy4gVGhlbiB0aGUgUk1TRSBhbmQgTUFFIGJlaW5nIGFyb3VuZCAxMi43NyBhbmQgfjkuODQgaW5kaWNhdGVzIHRoYXQgdGhhdCB0aGUgbW9kZWxzIHByZWRpY3Rpb25zIGFyZSBvZmYgYnkgYXJvdW5kIDEyLjc3IG9yIH45Ljg0IHVuaXRzIG9mIHBlcmNlbnQgd2hpY2ggaXMgbm90IGlkZWFsIHNpbmNlIHdlIGFyZSB0cnlpbmcgdG8gaGF2ZSBhbiBhY2N1cmF0ZSBtb2RlbCB0aGF0IHByZWRpY3RzIHRoZSBncmFkdWF0aW9uIHJhdGUgbW9yZSBhY2N1cmF0ZSB0aGFuIHRoaXMuIEFsc28sIHRoZSBSXjIgdmFsdWUgY29udmV5cyB0aGF0IHRoZSBtb2RlbCBleHBsYWlucyBjYW4gZXhwbGFpbiB0aGUgdmFyaWFuY2UgYXJvdW5kIDQ1LjU3JSBvZiB0aGUgdGltZS4gTGFzdGx5LCB0aGUgTVNFIGJlaW5nIH4xODEuMTYgbWVhc3VyaW5nIHRoZSBvdmVyYWxsIHBlcmZvcm1hbmNlIG9mIHRoZSBtb2RlbCBvbiB0aGUgdGVzdCBzZXQgaXMgdmVyeSBoaWdoLiBJbiBjb25jbHVzaW9uLCB3ZSBhcmUgYmV0dGVyIG9mZiB0cnlpbmcgYSBkaWZmZXJlbnQgbW9kZWwgdG8gdHJ5IGFuZCBwcmVkaWN0IHRoZSBncmFkdWF0aW9uIHJhdGUuDQoNClRoZSBub3JtYWwgTGluZWFyIG1vZGVsIG9uIHRoZSBvdGhlciBoYW5kIHNlZW1zIHRvIHlpZWxkIGEgbG93ZXIgTVNFIG9uIHRoZSB0ZXN0IGRhdGEgZGVzcGl0ZSBub3QgbXVjaCBnb2luZyBpbnRvIGl0LiBUaGUgcmVhc29ucyBmb3IgdGhpcyBjb3VsZCBiZSB0aGF0IGxhc3NvIGNhbiBiZSBtb3JlIGJpYXNlZCB0aGFuIHRoZSBub3JtYWwgbGluZWFyIHJlZ3Jlc3Npb24gbW9kZWxzIGlmIGxhbWJkYSBpcyB0byBsYXJnZSBvciB0aGUgZGF0YSBoYXMgYSBsb3Qgb2Ygbm9pc2UgaW4gaXQuIEhvd2V2ZXIsIGl0IHNlZW1zIGxpa2VseSB0aGF0IGl0IHByb2JhYmx5IGhhcyB0byBkbyB3aXRoIG91ciBsYW1iZGEgc2luY2UgaXQgaXMgbGFyZ2UuIEhvd2V2ZXIsIGEgTVNFIG9mIH4xNzUuNjEgaXMgbm90IGdvb2QgZW5vdWdoIGVpdGhlciBhcyBpdCBpcyBzdGlsbCB0byBsYXJnZS4NCg0KRnJvbSB0aGUgc3RhdHMgcHJpbnRlZCBmcm9tIHRoZSBub3JtYWwgbGluZWFyIHJlZ3Jlc3Npb24gbW9kZWwgd2UgY2FuIHNlZSB0aGF0IHRoZSBwcmVkaWN0b3JzIFByaXZhdGUsIEFwcHMsIFRvcDI1cGVyYywgUC5VbmRlcmdyYWQsIE91dHN0YXRlLCBSb29tLkJvYXJkLCBQZXJzb25hbCwgcGVyYy5hbHVtbmksIGFuZCBFeHBlbmQgaGF2ZSBwLXZhbHVlcyBsb3cgZW5vdWdoIHRvIHByb3ZpZGUgZXZpZGVuY2UgdGhhdCB0aGVzZSBwcmVkaWN0b3JzIGhhdmUgYSByZWxhdGlvbnNoaXAgd2l0aCB0aGUgcmVzcG9uc2UgdmFyaWFibGUuDQoNCldyYXBwaW5nIHVwIG91ciBmaXQgd2l0aCBhIGxpbmVhciByZWdyZXNzaW9uIG1vZGVsIGV2ZW4gdGhvdWdoIHRoZSBoaWdoIE1TRSBpcyBub3QgZGVzaXJhYmxlLCB3ZSBoYXZlIG1vcmUgb2YgYSBjbHVlIGFzIHRvIHdoYXQgcHJlZGljdG9ycyBhcmUgY29ycmxlbGF0ZWQgd2l0aCB0aGUgZ3JhZHVhdGlvbiByYXRlLg0KDQo8aDEgc3R5bGU9ImZvbnQtc2l6ZTogMThweDsiPioqRGVjaXNpb24gVHJlZSoqPC9oMT4NCg0KVG8gaW1wcm92ZSB1cG9uIHRoZSBNU0UgYW5kIGdldCBtb3JlIGluc2lnaHQgaW50byB3aGF0IHByZWRpY3RvcnMgbW9zdCBpbmZsdWVuY2Ugb3VyIHJlc3BvbnNlIHdlIHdpbGwgZml0IGEgZGVjaXNpb24gdHJlZSBhbmQgYW5vdGhlciB3aXRoIExPT0NWIGNyb3NzIHZhbGlkYXRpb24gY29tcGFyaW5nIHRoZSB0d28uIE5vdGU6IHRoZSByZWFzb24gSSBzd2l0Y2hlZCB0byBMT09DViBmcm9tIGstZm9sZCBpcyB0aGF0IEkgZ290IGEgcmVzYW1wbGluZyB3YXJuaW5nIHRoYXQgd2FzIGEgc2lkZSBlZmZlY3Qgb2Ygay1mb2xkIHdoaWNoIGVmZmVjdGVkIHRoZSB2YWxpZGl0eSBvZiB0aGUgbW9kZWwuDQoNCmBgYHtyfQ0KbGlicmFyeShycGFydCkNCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIEZpdCBhIGRlY2lzaW9uIHRyZWUgb24gdGhlIHRyYWluaW5nIGRhdGENCmZpdC50cmVlID0gcnBhcnQoR3JhZC5SYXRlIH4gLiwgZGF0YT10cmFpbmluZykNCg0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KIyBwcmVmb3JtIGNyb3NzIHZhbGlkYXRpb24gdG8gZ2V0IHRoZSBiZXN0IGZpdA0KIyBEZWZpbmUgdHVuaW5nIGdyaWQNCnR1bmVHcmlkID0gZXhwYW5kLmdyaWQoLmNwID0gc2VxKDAuMDEsIDAuNSwgMC4wMSkpDQoNCmN2ID0gdHJhaW5Db250cm9sKG1ldGhvZCA9ICJMT09DViIpDQpjdi5maXQgPSB0cmFpbihHcmFkLlJhdGUgfiAuLCBkYXRhID0gdHJhaW5pbmcsIG1ldGhvZCA9ICJycGFydCIsIHRyQ29udHJvbCA9IGN2LCB0dW5lR3JpZD10dW5lR3JpZCkNCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIEdlbmVyYWxpemF0aW9uIGVycm9yDQoNCnByZWQgPSBwcmVkaWN0KGZpdC50cmVlLCB0ZXN0aW5nKQ0KbXNlVHJlZSA9IG1lYW4oKHByZWQgLSB0ZXN0aW5nJEdyYWQuUmF0ZSleMikNCg0KcHJlZCA9IHByZWRpY3QoY3YuZml0LCB0ZXN0aW5nKQ0KbXNlQ3Jvc3NUcmVlID0gbWVhbigocHJlZCAtIHRlc3RpbmckR3JhZC5SYXRlKV4yKQ0KDQptZXNzYWdlKCJNZXRyaWNzIGZvciBmb3IgdGhlIGRlY2lzaW9uIHRyZWUgZml0IikNCnN1bW1hcnkoZml0LnRyZWUpDQptZXNzYWdlKHNwcmludGYoIlRoZSBNZWFuIHNxdWFyZWQgZXJyb3Igb2YgdGhlIGRlY2lzaW9uIHRyZWUgaXMgJWYiLCBtc2VUcmVlKSkNCg0KbWVzc2FnZSgiTWV0cmljcyBmb3IgZm9yIHRoZSBkZWNpc2lvbiB0cmVlIHdpdGggY3Jvc3MgdmFsaWRhdGlvbiBmaXQiKQ0Kc3VtbWFyeShjdi5maXQkcmVzdWx0cykNCm1lc3NhZ2Uoc3ByaW50ZigiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgay1mb2xkIGNyb3NzIHZhbGlkYXRpb24gZGVjaXNpb24gdHJlZSBpcyAlZiIsIG1zZUNyb3NzVHJlZSkpDQpgYGANCg0KVGhlIGNyb3NzIHZhbGlkYXRlZCBkZWNpc2lvbiB0cmVlIHBlcmZvcm1hbmNlIHRyYWl0cyBzaG93IHRoYXQgdGhlIGNvbXBsZXhpdHkgb2YgdGhlIG1vZGVsIGlzIGxvdyBhcyBjcCBpcyB2ZXJ5IGxvdy4gSG93ZXZlciwgaXQgc2VlbXMgdGhhdCB0aGlzIG1vZGVsIFJeMiBleHBsYWlucyBvbmx5IGEgbW9kZXJhdGUgYW1vdW50IG9mIHZhcmlhbmNlIGFzIGluZGljYXRlZCBieSB0aGUgUl4yIG1lYW4gdmFsdWUgb2YgfjAuNTYuIEFsc28sIHRoZSBSTVNFIGFuZCBNQUUgdmFsdWVzIGluZGljYXRlIHRoYXQgdGhlIG1vZGVsIGhhcyBhIGhpZ2ggbGV2ZWwgb2YgZXJyb3Igd2l0aCBpdHMgcHJlZGljYXRpb25zLiBBbHNvIHRoZSBNU0Ugb24gdGhlIHRlc3RpbmcgZGF0YSBpcyBzaWduaWZpY2FudGx5IGhpZ2hlciB0aGFuIHRoYW4gdGhlIGxpbmVhciByZWdyZXNzaW9uIG1vZGVscyBzaG93aW5nIG1ha2luZyB0aGlzIG1vZGVsIGluYWRlcXVldGUgdG8gcHJlZGljdCB0aGUgZ3JhZHVhdGlvbiByYXRlLg0KDQpUaGUgZGVjaXNpb24gdHJlZSBtb2RlbCB3aXRob3V0IGNyb3NzIHZhbGlkYXRpb24gaGFzIGEgbG93ZXIgTVNFIG9mIH4yMTQuNjMgY29tcGFyZWQgdG8gdGhlIG90aGVyIGRlY2lzaW9uIHRyZWUgbW9kZWwsIGJ1dCBib3RoIGFyZSBzdGlsbCB3b3JzZSBhdCBwcmVkaWN0aW5nIHRoZSByZXBzb25zZSB0aGFuIHRoZSBsaW5lYXIgcmVncmVzc2lvbiBtb2RlbHMuIEhvd2V2ZXIsIHRoZSB2YXJpYWJsZSBpbXBvcnRhbmNlIG9mIHRoZSBkZWNpc2lvbiB0cmVlIHNob3dzIHVzIHRoYXQgT3VzdGF0ZSBpcyB0aGUgbW9zdCBpbXBvcmFudCBwcmVkaWN0b3IgdGhlbiBvdGhlciBwcmVkaWN0b3JzIHRoYXQgaW1wYWN0IHRoZSBNU0UgYXJlIEV4cGVuZCwgVG9wMTBwZXJjLCBwZXJjLmFsdW1uaSwgUm9vbS5Cb2FyZCwgYW5kIFMuRi5SYXRpby4NCg0KQm90aCBkZWNpc2lvbiB0cmVlIG1vZGVscyBkbyBub3QgcHJlZGljdCBncmFkdWF0aW9uIHJhdGUgd2VsbCwgYnV0IGl0IGRvZXMgZ2l2ZSB1cyBpbnNpZ2h0IGludG8gd2hhdCBwcmVkaWN0b3JzIG1pZ2h0IGJlIGNvcnJlbGxhdGVkIHdpdGggdGhlIGdyYWR1YXRpb24gcmF0ZS4NCg0KPGgxIHN0eWxlPSJmb250LXNpemU6IDE4cHg7Ij4qKlJhbmRvbSBGb3Jlc3QqKjwvaDE+DQoNCmBgYHtyfQ0KIyBBbHJlYWR5IHBhcnRpdGlvbmVkIGRhdGEgZm9yIGRlY2lzaW9uIHRyZWUNCg0KbGlicmFyeShyYW5kb21Gb3Jlc3QpDQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KIyBGaXQgYSByYW5kb20gZm9yZXN0IG9uIHRoZSB0cmFpbmluZyBkYXRhDQpyYW5kLmZvcmVzdCA9IHJhbmRvbUZvcmVzdChHcmFkLlJhdGUgfiAuLCBkYXRhID0gdHJhaW5pbmcsIG50cmVlID0gNTAwKQ0KDQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIHByZWZvcm0gY3Jvc3MgdmFsaWRhdGlvbiB0byBnZXQgdGhlIGJlc3QgZml0DQoNCmN2ID0gdHJhaW5Db250cm9sKG1ldGhvZCA9ICJjdiIsIG51bWJlciA9IGspDQpjdi5maXRSYW5kID0gdHJhaW4oR3JhZC5SYXRlIH4gLiwgZGF0YSA9IHRyYWluaW5nLCBtZXRob2QgPSAicmYiLCB0ckNvbnRyb2wgPSBjdiwgdHVuZUxlbmd0aD01KSAjIFRPRE8NCiNUT0RPDQoNCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQojIEdlbmVyYWxpemF0aW9uIGVycm9yDQoNCnByZWQgPSBwcmVkaWN0KHJhbmQuZm9yZXN0LCB0ZXN0aW5nKQ0KbXNlUmFuZCA9IG1lYW4oKHByZWQgLSB0ZXN0aW5nJEdyYWQuUmF0ZSleMikNCg0KcHJlZCA9IHByZWRpY3QoY3YuZml0UmFuZCwgdGVzdGluZykNCm1zZUNyb3NzUmFuZCA9IG1lYW4oKHByZWQgLSB0ZXN0aW5nJEdyYWQuUmF0ZSleMikNCg0Kc3VtbWFyeShyYW5kLmZvcmVzdCkNCnN1bW1hcnkoY3YuZml0UmFuZCkNCm1lc3NhZ2Uoc3ByaW50ZigiVGhlIE1lYW4gc3F1YXJlZCBlcnJvciBvZiB0aGUgcmFuZG9tIGZvcmVzdCBpcyAlZiIsIG1zZVJhbmQpKQ0KbWVzc2FnZShzcHJpbnRmKCJUaGUgTWVhbiBzcXVhcmVkIGVycm9yIG9mIHRoZSBrLWZvbGQgY3Jvc3MgdmFsaWRhdGlvbiByYW5kb20gZm9yZXN0IGlzICVmIiwgbXNlQ3Jvc3NSYW5kKSkNCmBgYA0KDQo8aDEgc3R5bGU9ImZvbnQtc2l6ZTogMzBweDsiPlJlc3VsdHM8L2gxPg0KDQpUaGlzIHByb2plY3Qgd2lsbCBwcm92aWRlIHZhbHVhYmxlIGluc2lnaHRzIGludG8gdGhlIGNvcnJlbGF0aW9uIGJldHdlZW4gZGlmZmVyZW50IGZhY3RvcnMgYW5kIHRoZSBwZXJmb3JtYW5jZSBvZiBVUyBjb2xsZWdlcy4gVGhyb3VnaCB0aGUgdXNlIG9mIHN0YXRpc3RpY2FsIGFuYWx5c2lzIGFuZCBtYWNoaW5lIGxlYXJuaW5nIHRlY2huaXF1ZXMsIEkgYWltIHRvIGRldGVybWluZSB3aGljaCB2YXJpYWJsZXMgYXJlIG1vc3Qgc2lnbmlmaWNhbnQgYW5kIHByb3ZpZGUgcmVjb21tZW5kYXRpb25zIGZvciBzdHVkZW50cyB3aG8gYXJlIHNlZWtpbmcgdG8gc2VsZWN0IHRoZSBiZXN0IGNvbGxlZ2UgZm9yIHRoZWlyIG5lZWRzLg==</div>
 
 
 

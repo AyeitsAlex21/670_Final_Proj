@@ -2,8 +2,7 @@
 title: "CS 670 Final Project R Notebook"
 output: html_notebook
 ---
-#
-**Introduction**
+<h1 style="font-size: 30px;">Introduction</h1>
 
 For my project, I plan to work with the College dataset located in the ISLR2 library created by the authors of the book "An Introduction to Statistical Learning with Applications in R". This dataset was collected by sampling information from 777 colleges from the 1995 issue of US News and World Report which is a news magazine that publishes rankings of colleges within the US. The purpose of collecting this data was to provide a resource for students and researchers to explore the correlation between different factors and the performance of US colleges. Each college is represented in 18 different columns containing statistics on various aspects of that college which include:
 
@@ -28,13 +27,11 @@ For my project, I plan to work with the College dataset located in the ISLR2 lib
 
 Some representation decisions were made when creating this dataset. For example, the Private column was coded as a factor with two levels, "Yes" and "No," rather than a numerical value. This decision was made to avoid issues with comparing private and public colleges based on cost, admission rates, or other factors. Also, the Ph.D. and Terminal columns were represented as percentages rather than numbers to provide a better representation of the faculty's qualifications.
 
-
-#
-**Questions**
+<h1 style="font-size: 30px;">Questions</h1>
 
 My objective is to explore what factors are most correlated with a college's graduation rate as well as to be able to predict accurately a new colleges graduation rate given some data. This analysis will offer insights into the state of higher education in the US and identify what is being paid for. The results of my study could be useful for others who are looking to choose the best college for their needs.
 
-**Visualization**
+<h1 style="font-size: 30px;">Visualization</h1>
 
 To understand and gain insights into patterns and trends within the data that are not immediately visible its important to visualize our data. We first can load up all of our libraries we will need and convert all the quantitative data into qualitative using this and saving it into the College_data variable.
 
@@ -71,14 +68,14 @@ cor(College_data)[- which(colnames(College) == "Grad.Rate"), "Grad.Rate"] # prin
 
 Analyzing the graphs and the correlations we can see that the Private, Top10perc, Top20prec, Outstate, Room.Board, phD, S.F.Ratio, perc.alumni and Expend have evidence of being moderately correlated with the Graduation Rate. Using this information we can hypothesize before we fit our model that some of these variables can be related to Graduation rate.
 
-**Modeling**
+<h1 style="font-size: 30px;">Modeling</h1>
 
 To achieve my goal, I plan to first use a linear regression model to predict the qualitative responses. I will also experiment with using random forests and decision trees. I also plan to apply k-fold cross-validation and Lasso to ensure the validity of my model, specifically using the Lasso method as I anticipate that not all variables will be linked to the response.
 
 To start we divide the data to be 70% training and 30% testing.
 
 ```{r}
-set.seed(5) 
+set.seed(0) 
 
 alpha = 1
 k = 10
@@ -88,41 +85,54 @@ lambda = 10^seq(10, -2, length = 100)
 x = model.matrix(Grad.Rate ~ ., data = College_data)[, -1]
 y = College_data$Grad.Rate
 
-train = sample(1:nrow(x), 0.7*nrow(x)) # 70% training data
-test = (-train)
-y.test <- y[test]
+trainIndex = createDataPartition(College_data$Grad.Rate, p = 0.7, list = FALSE)
+training = na.omit(College_data[trainIndex, ])
+testing = na.omit(College_data[-trainIndex, ])
 ```
 
-Then using these two sets of data we can fit a linear regression model using k-folds and Lasso to predict the Graduation rate.
+<h1 style="font-size: 18px;">**Linear Regression**</h1>
+
+Then using these two sets of data we can fit a linear regression model using k-folds and Lasso to predict the Graduation rate. I will also fit a normal linear regression on the training data so we can infer the relationships between the predictors and response, and see how much the models performance improves using cross validation.
 
 ```{r}
 #----------------------------------------------------------------
 # Fit on training data
-shrink.mod <- glmnet(x[train,], y[train], alpha = alpha, lambda = lambda, family="gaussian")
+cv = trainControl(method = "cv", number = k)
+shrink.mod = train(Grad.Rate ~ ., data = training, method = "glmnet", trControl = cv)
 
-#------------------------------------------------
-# preform cross validation to get the best lambda
+lm.fit = lm(Grad.Rate ~ ., data=College_data)
 
-cv.out = cv.glmnet(x[train,], y[train], alpha=alpha, nfolds=k, family="gaussian")
-bestlam = cv.out$lambda.min
-
+# glmnet is lasso
 #----------------------------------------------
 # Generalization Error
-shrink.pred <- predict(shrink.mod , s = bestlam , newx = x[test, ], family="gaussian")
 
-MSE =  mean((shrink.pred - y.test)^2)
+shrink.pred = predict(shrink.mod, testing)
+MSE =  mean((testing$Grad.Rate - shrink.pred)^2)
 
-message(sprintf("The Mean Squared error is %f", MSE))
+shrink.pred = predict(lm.fit, testing)
+MSElm =  mean((testing$Grad.Rate - shrink.pred)^2)
+
+summary(lm.fit)
+message(sprintf("The Mean squared error of the Linear Regression is %f", MSElm))
+
+#plot(shrink.mod$finalModel, xvar = "lambda", label = TRUE)
+
+summary(shrink.mod$results)
+message(sprintf("The Mean squared error of the Linear Regression using k-fold cross validation and Lasso is %f", MSE))
 ```
+For our cross validated lasso regression model from the statistics printed above we can see that that the optimal alpha is 0.55 suggesting we are applying moderate regularization with the optimal lambda for shrinkage being ~0.74 which shows that the models has many high coefficients. Then the RMSE and MAE being around 12.77 and ~9.84 indicates that that the models predictions are off by around 12.77 or ~9.84 units of percent which is not ideal since we are trying to have an accurate model that predicts the graduation rate more accurate than this. Also, the R^2 value conveys that the model explains can explain the variance around 45.57% of the time. Lastly, the MSE being ~181.16 measuring the overall performance of the model on the test set is very high. In conclusion, we are better off trying a different model to try and predict the graduation rate.
 
-Now we do it with a decision tree with cross validation.
+The normal Linear model on the other hand seems to yield a lower MSE on the test data despite not much going into it. The reasons for this could be that lasso can be more biased than the normal linear regression models if lambda is to large or the data has a lot of noise in it. However, it seems likely that it probably has to do with our lambda since it is large. However, a MSE of ~175.61 is not good enough either as it is still to large.
+
+From the stats printed from the normal linear regression model we can see that the predictors Private, Apps, Top25perc, P.Undergrad, Outstate, Room.Board, Personal, perc.alumni, and Expend have p-values low enough to provide evidence that these predictors have a relationship with the response variable.
+
+Wrapping up our fit with a linear regression model even though the high MSE is not desirable, we have more of a clue as to what predictors are corrlelated with the graduation rate.
+
+<h1 style="font-size: 18px;">**Decision Tree**</h1>
+
+To improve upon the MSE and get more insight into what predictors most influence our response we will fit a decision tree and another with LOOCV cross validation comparing the two. Note: the reason I switched to LOOCV from k-fold is that I got a resampling warning that was a side effect of k-fold which effected the validity of the model.
 
 ```{r}
-# This time partition our data using indexing
-trainIndex <- createDataPartition(College_data$Grad.Rate, p = 0.7, list = FALSE)
-training <- College_data[trainIndex, ]
-testing <- College_data[-trainIndex, ]
-
 library(rpart)
 #----------------------------------------------------------------
 # Fit a decision tree on the training data
@@ -130,10 +140,11 @@ fit.tree = rpart(Grad.Rate ~ ., data=training)
 
 #------------------------------------------------
 # preform cross validation to get the best fit
+# Define tuning grid
+tuneGrid = expand.grid(.cp = seq(0.01, 0.5, 0.01))
 
-cv = trainControl(method = "cv", number = 10)
-cv.fit = train(Grad.Rate ~ ., data = training, method = "rpart", trControl = cv)
-
+cv = trainControl(method = "LOOCV")
+cv.fit = train(Grad.Rate ~ ., data = training, method = "rpart", trControl = cv, tuneGrid=tuneGrid)
 #----------------------------------------------
 # Generalization error
 
@@ -143,11 +154,53 @@ mseTree = mean((pred - testing$Grad.Rate)^2)
 pred = predict(cv.fit, testing)
 mseCrossTree = mean((pred - testing$Grad.Rate)^2)
 
+message("Metrics for for the decision tree fit")
 summary(fit.tree)
-message(sprintf("The Mean Squared error of the decision tree is %f", mseTree))
-message(sprintf("The Mean Squared error of the k-fold cross validation decision tree is %f", mseCrossTree))
+message(sprintf("The Mean squared error of the decision tree is %f", mseTree))
+
+message("Metrics for for the decision tree with cross validation fit")
+summary(cv.fit$results)
+message(sprintf("The Mean squared error of the k-fold cross validation decision tree is %f", mseCrossTree))
 ```
 
-**Results**
+The cross validated decision tree performance traits show that the complexity of the model is low as cp is very low. However, it seems that this model R^2 explains only a moderate amount of variance as indicated by the R^2 mean value of ~0.56. Also, the RMSE and MAE values indicate that the model has a high level of error with its predications. Also the MSE on the testing data is significantly higher than than the linear regression models showing making this model inadequete to predict the graduation rate.
+
+The decision tree model without cross validation has a lower MSE of ~214.63 compared to the other decision tree model, but both are still worse at predicting the repsonse than the linear regression models. However, the variable importance of the decision tree shows us that Oustate is the most imporant predictor then other predictors that impact the MSE are Expend, Top10perc, perc.alumni, Room.Board, and S.F.Ratio.
+
+Both decision tree models do not predict graduation rate well, but it does give us insight into what predictors might be correllated with the graduation rate.
+
+<h1 style="font-size: 18px;">**Random Forest**</h1>
+
+```{r}
+# Already partitioned data for decision tree
+
+library(randomForest)
+#----------------------------------------------------------------
+# Fit a random forest on the training data
+rand.forest = randomForest(Grad.Rate ~ ., data = training, ntree = 500)
+
+#------------------------------------------------
+# preform cross validation to get the best fit
+
+cv = trainControl(method = "cv", number = k)
+cv.fitRand = train(Grad.Rate ~ ., data = training, method = "rf", trControl = cv, tuneLength=5) # TODO
+#TODO
+
+#----------------------------------------------
+# Generalization error
+
+pred = predict(rand.forest, testing)
+mseRand = mean((pred - testing$Grad.Rate)^2)
+
+pred = predict(cv.fitRand, testing)
+mseCrossRand = mean((pred - testing$Grad.Rate)^2)
+
+summary(rand.forest)
+summary(cv.fitRand)
+message(sprintf("The Mean squared error of the random forest is %f", mseRand))
+message(sprintf("The Mean squared error of the k-fold cross validation random forest is %f", mseCrossRand))
+```
+
+<h1 style="font-size: 30px;">Results</h1>
 
 This project will provide valuable insights into the correlation between different factors and the performance of US colleges. Through the use of statistical analysis and machine learning techniques, I aim to determine which variables are most significant and provide recommendations for students who are seeking to select the best college for their needs.
