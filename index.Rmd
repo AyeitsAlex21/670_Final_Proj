@@ -1,5 +1,5 @@
 ---
-title: "CS 670 Final Project R Notebook"
+title: "Predicting and Inferring Graduation Rate Among U.S. Colleges"
 output: html_notebook
 ---
 <h1 style="font-size: 30px;">Introduction</h1>
@@ -27,6 +27,8 @@ For my project, I plan to work with the College dataset located in the ISLR2 lib
 
 Some representation decisions were made when creating this dataset. For example, the Private column was coded as a factor with two levels, "Yes" and "No," rather than a numerical value. This decision was made to avoid issues with comparing private and public colleges based on cost, admission rates, or other factors. Also, the Ph.D. and Terminal columns were represented as percentages rather than numbers to provide a better representation of the faculty's qualifications.
 
+This project will provide valuable insights into the correlation between different factors and the performance of US colleges. Through the use of statistical analysis and machine learning techniques, I aim to determine which variables are most significant and provide recommendations for students who are seeking to select the best college for their needs.
+
 <h1 style="font-size: 30px;">Questions</h1>
 
 My objective is to explore what factors are most correlated with a college's graduation rate as well as to be able to predict accurately a new colleges graduation rate given some data. This analysis will offer insights into the state of higher education in the US and identify what is being paid for. The results of my study could be useful for others who are looking to choose the best college for their needs.
@@ -41,6 +43,8 @@ library(ggplot2)
 library(dplyr)
 library(glmnet)
 library(caret)
+library(Metrics)
+library(rsq)
 
 College_data = College_quant_data <- na.omit(College) %>%
   mutate_all(~ if(is.factor(.)) {
@@ -50,15 +54,19 @@ College_data = College_quant_data <- na.omit(College) %>%
   })
 ```
 
-We can then start to visualize our data by creating a scatter plot matrices for each variable we are investigating between all other variables as well as listing their correlations.
+We can then start to visualize our data by creating a histogram of the graduation rate and a scatter plot matrices for each variable we are investigating between all other variables as well as listing their correlations.
 
 First we will start with visualizing the scatter plots for the Graduation Rate to see if there's any visual correlations there.
 
 ```{r}
+
+colnames = names(College_data)
+message(sprintf("The mean of Grad.Rate is %f", mean(College_data$Grad.Rate)))
+message(sprintf("The standard deviation of Grad.Rate is %f", sd(College_data$Grad.Rate)))
+
+hist(College_data$Grad.Rate, col = "blue", main = "Graduation Rates")
+
 par(mfrow = c(3, 3))
-
-colnames <- names(College_data)
-
 for (i in 2:length(colnames) - 1) {
   # make scatter plot of Grad.Rate against the current predictor
   plot(College[,i], College$Grad.Rate, xlab = colnames[i], ylab = "Grad.Rate")
@@ -66,11 +74,13 @@ for (i in 2:length(colnames) - 1) {
 cor(College_data)[- which(colnames(College) == "Grad.Rate"), "Grad.Rate"] # print out correlations except the grad to grad
 ```
 
-Analyzing the graphs and the correlations we can see that the Private, Top10perc, Top20prec, Outstate, Room.Board, phD, S.F.Ratio, perc.alumni and Expend have evidence of being moderately correlated with the Graduation Rate. Using this information we can hypothesize before we fit our model that some of these variables can be related to Graduation rate.
+Looking at the histogram we can see that it follows a Gaussian, centered around 60-70% with a mean of ~65.46, and a standard deviation of ~17.17. It also has an outlier with a graduation rate more than 100% which obviously cant be the case as its caps at 100%.
+
+Analyzing the scatter plots and the correlations we can see that the Private, Top10perc, Top20prec, Outstate, Room.Board, phD, S.F.Ratio, perc.alumni and Expend have evidence of being moderately correlated with the Graduation Rate. Using this information we can hypothesize before we fit our model that some of these variables can be related to Graduation rate.
 
 <h1 style="font-size: 30px;">Modeling</h1>
 
-To achieve my goal, I plan to first use a linear regression model to predict the qualitative responses. I will also experiment with using random forests and decision trees. I also plan to apply k-fold cross-validation and Lasso to ensure the validity of my model, specifically using the Lasso method as I anticipate that not all variables will be linked to the response.
+To achieve my goal, I plan to first use a linear regression model to predict the quantitative responses. I will also experiment with using random forests and decision trees. I also plan to apply k-fold cross-validation and Lasso (in the linear regression case) to ensure the validity of my model, specifically using the Lasso method as I anticipate that not all variables will be linked to the response.
 
 To start we divide the data to be 70% training and 30% testing.
 
@@ -100,7 +110,7 @@ Then using these two sets of data we can fit a linear regression model using k-f
 cv = trainControl(method = "cv", number = k)
 shrink.mod = train(Grad.Rate ~ ., data = training, method = "glmnet", trControl = cv)
 
-lm.fit = lm(Grad.Rate ~ ., data=College_data)
+lm.fit = lm(Grad.Rate ~ ., data=training)
 
 # glmnet is lasso
 #----------------------------------------------
@@ -108,32 +118,47 @@ lm.fit = lm(Grad.Rate ~ ., data=College_data)
 
 shrink.pred = predict(shrink.mod, testing)
 MSE =  mean((testing$Grad.Rate - shrink.pred)^2)
+Maek = mae(shrink.pred, testing$Grad.Rate)
+Rsqk = R2(shrink.pred, testing$Grad.Rate)
 
 shrink.pred = predict(lm.fit, testing)
 MSElm =  mean((testing$Grad.Rate - shrink.pred)^2)
+Maelm = mae(shrink.pred, testing$Grad.Rate)
+Rsqlm = R2(shrink.pred, testing$Grad.Rate)
 
-summary(lm.fit)
-message(sprintf("The Mean squared error of the Linear Regression is %f", MSElm))
 
-#plot(shrink.mod$finalModel, xvar = "lambda", label = TRUE)
 
-summary(shrink.mod$results)
-message(sprintf("The Mean squared error of the Linear Regression using k-fold cross validation and Lasso is %f", MSE))
+message("Metrics for for the decision linear regression with hold-out cross validation")
+par(mfrow = c(2, 2))
+plot(lm.fit)
+print(varImp(lm.fit))
+message(sprintf("Linear regression with hold-out cross validation statistic R^2 is %f", Rsqlm))
+message(sprintf("Linear regression with hold-out cross validation statistic MAE is %f", Maelm))
+message(sprintf("The Mean squared error of the linear regression with hold-out cross validation is %f", MSElm))
+
+message("Metrics for for the Linear regression with k-fold cross validation and lasso fit")
+summary(cv.fit$results)
+plot(shrink.mod)
+print(varImp(cv.fit$finalModel))
+message(sprintf("Linear regression with k-fold cross validation and lasso statistic R^2 is %f", Rsqk))
+message(sprintf("Linear regression with k-fold cross validation and lasso statistic MAE is %f", Maek))
+message(sprintf("The Mean squared error of the linear regression with k-fold cross validation and lasso fit is %f", MSE))
 ```
-For our cross validated lasso regression model from the statistics printed above we can see that that the optimal alpha is 0.55 suggesting we are applying moderate regularization with the optimal lambda for shrinkage being ~0.74 which shows that the models has many high coefficients. Then the RMSE and MAE being around 12.77 and ~9.84 indicates that that the models predictions are off by around 12.77 or ~9.84 units of percent which is not ideal since we are trying to have an accurate model that predicts the graduation rate more accurate than this. Also, the R^2 value conveys that the model explains can explain the variance around 45.57% of the time. Lastly, the MSE being ~181.16 measuring the overall performance of the model on the test set is very high. In conclusion, we are better off trying a different model to try and predict the graduation rate.
+**Results of the Linear Regressions**
 
-The normal Linear model on the other hand seems to yield a lower MSE on the test data despite not much going into it. The reasons for this could be that lasso can be more biased than the normal linear regression models if lambda is to large or the data has a lot of noise in it. However, it seems likely that it probably has to do with our lambda since it is large. However, a MSE of ~175.61 is not good enough either as it is still to large.
+For the k-fold cross-validated linear regression with lasso, the R^2 statistic on the test data shows that the model explains the variance ~33.52% of the time which could be better since there is still a large amount of unexplained variance. Also, a high MAE on the test data indicates that the model has a high error level with its predictions. However, the MSE value of ~198.08 is lower than the MSE for linear regression with hold-out cross-validation. This model performs far from desirable with a low R^2, and high MAE and MSE. The diagnostic plot RSME vs. Mixing Percentage shows that increasing the shrinkage parameter effects does not really effect the RMSE which is the measure of average deviation from the actual answer. 
 
-From the stats printed from the normal linear regression model we can see that the predictors Private, Apps, Top25perc, P.Undergrad, Outstate, Room.Board, Personal, perc.alumni, and Expend have p-values low enough to provide evidence that these predictors have a relationship with the response variable.
+For the hold-out cross-validation linear regression, the R^2 statistic shows that the model explains the variance ~31.76% of the time which is not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the test data is noticeably above the MSE on the k-fold cross-validated linear regression. Although, both models preform similarly the k-fold lasso regression model wins out by having slightly better stats in all measured categories. From the diagnostic plots the we can see that the model depicts a linear relationship and no data point influences the model in abnormal way to justify taking it out.
 
-Wrapping up our fit with a linear regression model even though the high MSE is not desirable, we have more of a clue as to what predictors are corrlelated with the graduation rate.
+For inference using variable importance measure (VIM) of what predictors are correlated with the response graduation rate, we can see for both the hold-out cross-validation linear regression and the k-fold cross-validated linear regression the most important variables are: Outstate, Apps, Top25perc, Top10perc, and perc.alumni.
 
 <h1 style="font-size: 18px;">**Decision Tree**</h1>
 
-To improve upon the MSE and get more insight into what predictors most influence our response we will fit a decision tree and another with LOOCV cross validation comparing the two. Note: the reason I switched to LOOCV from k-fold is that I got a resampling warning that was a side effect of k-fold which effected the validity of the model.
+The linear regression models could have preformed poorly due to it the predictors having non-linear relationships making a linear regression approach less effective, so to improve upon the MSE and get more insight into what predictors most influence our response we will fit a decision tree and another with LOOCV cross validation comparing the two. Note: the reason I switched to LOOCV from k-fold is that I got a resampling warning that was a side effect of k-fold which effected the validity of the model.
 
 ```{r}
 library(rpart)
+library(rpart.plot)
 #----------------------------------------------------------------
 # Fit a decision tree on the training data
 fit.tree = rpart(Grad.Rate ~ ., data=training)
@@ -141,7 +166,7 @@ fit.tree = rpart(Grad.Rate ~ ., data=training)
 #------------------------------------------------
 # preform cross validation to get the best fit
 # Define tuning grid
-tuneGrid = expand.grid(.cp = seq(0.01, 0.5, 0.01))
+tuneGrid = expand.grid(.cp = seq(0, 1, 0.01))
 
 cv = trainControl(method = "LOOCV")
 cv.fit = train(Grad.Rate ~ ., data = training, method = "rpart", trControl = cv, tuneGrid=tuneGrid)
@@ -150,26 +175,43 @@ cv.fit = train(Grad.Rate ~ ., data = training, method = "rpart", trControl = cv,
 
 pred = predict(fit.tree, testing)
 mseTree = mean((pred - testing$Grad.Rate)^2)
+MaeTree = mae(pred, testing$Grad.Rate)
+RsqTree = R2(pred, testing$Grad.Rate)
 
 pred = predict(cv.fit, testing)
 mseCrossTree = mean((pred - testing$Grad.Rate)^2)
+MaeCrossTree = mae(pred, testing$Grad.Rate)
+RsqCrossTree = R2(pred, testing$Grad.Rate)
 
-message("Metrics for for the decision tree fit")
-summary(fit.tree)
-message(sprintf("The Mean squared error of the decision tree is %f", mseTree))
+message("Metrics for for the decision tree fit with hold-out cross validation")
+rpart.plot(fit.tree)
+print(varImp(fit.tree))
+message(sprintf("Decision tree with hold-out cross validation statistic R^2 is %f", RsqTree))
+message(sprintf("Decision tree with hold-out cross validation statistic MAE is %f", MaeTree))
+message(sprintf("The Mean squared error of the decision tree with hold-out cross validation is %f", mseTree))
 
 message("Metrics for for the decision tree with cross validation fit")
-summary(cv.fit$results)
+rpart.plot(cv.fit$finalModel)
+print(varImp(cv.fit$finalModel))
+message(sprintf("Decision tree with k-fold cross validation statistic R^2 is %f", RsqCrossTree))
+message(sprintf("Decision tree with k-fold cross validation statistic MAE is %f", MaeCrossTree))
 message(sprintf("The Mean squared error of the k-fold cross validation decision tree is %f", mseCrossTree))
 ```
 
-The cross validated decision tree performance traits show that the complexity of the model is low as cp is very low. However, it seems that this model R^2 explains only a moderate amount of variance as indicated by the R^2 mean value of ~0.56. Also, the RMSE and MAE values indicate that the model has a high level of error with its predications. Also the MSE on the testing data is significantly higher than than the linear regression models showing making this model inadequete to predict the graduation rate.
+**Results of the Decision Trees**
 
-The decision tree model without cross validation has a lower MSE of ~214.63 compared to the other decision tree model, but both are still worse at predicting the repsonse than the linear regression models. However, the variable importance of the decision tree shows us that Oustate is the most imporant predictor then other predictors that impact the MSE are Expend, Top10perc, perc.alumni, Room.Board, and S.F.Ratio.
+For the LOOCV cross-validated decision tree, the R^2 statistic on the test data shows that the model explains the variance ~28.78% of the time which is poor since there is still a large amount of unexplained variance. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the testing data is significantly lower than the linear regression making this model more suitable for predicting graduation rate. This model is a step up from linear regression. Although, it’s still performing far from desirable with an abysmally low R^2, and high MAE and MSE.
 
-Both decision tree models do not predict graduation rate well, but it does give us insight into what predictors might be correllated with the graduation rate.
+For the hold-out cross-validation decision tree, the R^2 statistic shows that the model explains the variance ~28.78% of the time which is the same as the LOOCV cross-validated version and not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high level of error with its predictions. However, the MSE on the test data is equivalent to the MSE on the LOOCV cross-validated decision tree. The similarity of statistics between the LOOCV cross-validated and the hold-out cross-validated decision trees could be because of randomness in the data or the training data is not representative of results in the real world. Another reason could be because the LOOCV method is preforming equivalently to hold-out because they yield the same results with a large enough dataset.
+
+To comment on the actual tree visuals both are the same most likely because they are working with the same training data making their optimal complexity parameters equal. Therefore, yielding the same tree.
+
+For inference using variable importance measure (VIM) and looking at the decision tree graphs we can see what predictors are correlated with the response graduation rate, we can see for both the hold-out cross-validation decision tree and the LOOCV cross-validated decision tree the most important variables are: Outstate, Apps, Top25perc, Top10perc, and perc.alumni. 
+
 
 <h1 style="font-size: 18px;">**Random Forest**</h1>
+
+A decision tree compared to a random forest will tend to over fit and not be as accurate, so to maybe get a better model to predict the graduation rate we can fit a random forest.
 
 ```{r}
 # Already partitioned data for decision tree
@@ -191,16 +233,117 @@ cv.fitRand = train(Grad.Rate ~ ., data = training, method = "rf", trControl = cv
 
 pred = predict(rand.forest, testing)
 mseRand = mean((pred - testing$Grad.Rate)^2)
+MaeRand = mae(pred, testing$Grad.Rate)
+RsqRand = R2(pred, testing$Grad.Rate)
 
 pred = predict(cv.fitRand, testing)
 mseCrossRand = mean((pred - testing$Grad.Rate)^2)
+MaeCrossRand = mae(pred, testing$Grad.Rate)
+RsqCrossRand = R2(pred, testing$Grad.Rate)
 
-summary(rand.forest)
-summary(cv.fitRand)
+message(sprintf("Random forest with hold-out cross validation statistics are:"))
+message("Variable importance for the random forest with hold-out cross validation is:")
+varImpPlot(rand.forest)
+print(varImp(rand.forest))
+message(sprintf("Random forest with hold-out cross validation statistic R^2 is %f", RsqRand))
+message(sprintf("Random forest with hold-out cross validation statistic MAE is %f", MaeRand))
 message(sprintf("The Mean squared error of the random forest is %f", mseRand))
+
+message(sprintf("Random forest with LOOCV cross validation statistics are:"))
+message("Variable importance for the random forest with k-fold cross validation is:")
+varImpPlot(cv.fitRand$finalModel)
+print(varImp(cv.fitRand$finalModel))
+message(sprintf("Random forest with LOOCV cross validation statistic R^2 is %f", RsqCrossRand))
+message(sprintf("Random forest with LOOCV cross validation statistic MAE is %f", MaeCrossRand))
 message(sprintf("The Mean squared error of the k-fold cross validation random forest is %f", mseCrossRand))
 ```
 
-<h1 style="font-size: 30px;">Results</h1>
+**Results of the Random Forests**
 
-This project will provide valuable insights into the correlation between different factors and the performance of US colleges. Through the use of statistical analysis and machine learning techniques, I aim to determine which variables are most significant and provide recommendations for students who are seeking to select the best college for their needs.
+For the k-fold cross-validated random forest, the R^2 statistic on the test data shows that the model explains the variance ~37.22% of the time which could be better since there is still a large amount of unexplained variance. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the testing data is significantly lower than the linear regression and decision tree models, making this model more suitable for predicting graduation rates. This model is the best performing so far in predicting the graduation rate. Although, it still performs far from desirable with an abysmally low R^2, and high MAE and MSE.
+
+For the hold-out cross-validation random forest, the R^2 statistic shows that the model explains the variance ~36.99% of the time which is not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the test data is just above the MSE on the k-fold cross-validated random forest This similarity of statistics between the k-fold cross-validated and the hold-out cross-validation validated random forests could be because of randomness in the data or the training data is not representative of results in the real world.
+
+For inference using variable importance measure (VIM) of what predictors are correlated with the response graduation rate, we can see for both the hold-out cross-validation random forest and the k-fold cross-validated random forest the most important variables are: Outstate, Top25perc, Top10perc, and perc.alumni, Room.Board.
+
+<h1 style="font-size: 30px;">Overall Results, Analysis, and Discussions</h1>
+
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    text-align: center;
+    padding: 8px;
+  }
+  th {
+    background-color: #dddddd;
+    font-weight: bold;
+  }
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+</style>
+
+<table>
+  <tr>
+    <th>Model Name</th>
+    <th>R<sup>2</sup></th>
+    <th>MSE</th>
+    <th>MAE</th>
+  </tr>
+  <tr>
+    <td>Linear Regression Hold-Out Cross-Validation</td>
+    <td>0.317613</td>
+    <td>205.316608</td>
+    <td>10.193009</td>
+  </tr>
+  <tr>
+    <td>Linear Regression k-fold Cross-Validation</td>
+    <td>0.335287</td>
+    <td>198.085865</td>
+    <td>10.106158</td>
+  </tr>
+  <tr>
+    <td>Decision Tree with Hold-Out Cross-Validation</td>
+    <td>0.287870</td>
+    <td>214.633345</td>
+    <td>10.904169</td>
+  </tr>
+  <tr>
+    <td>Decision Tree with LOOCV Cross-Validation</td>
+    <td>0.287870</td>
+    <td>214.633345</td>
+    <td>10.904169</td>
+  </tr>
+  <tr>
+    <td>Random Forest with Hold-Out Cross-Validation</td>
+    <td>0.369972</td>
+    <td>184.958105</td>
+    <td>9.409218</td>
+  </tr>
+  <tr>
+    <td>Random Forest with k-fold Cross-Validation</td>
+    <td>0.372286</td>
+    <td>184.123877</td>
+    <td>9.393987</td>
+  </tr>
+</table>
+
+
+Overall, our models were not able to accurately predict graduation rates. The best performing model was the random forest with k-fold cross-validation, but even this model had a relatively low R2 and high MSE and MAE. suggesting that the available data on graduation rates may not be currently sufficient for making a accurate model meaning further research is needed to identify the most influential variables that impact graduation rates.
+
+Even though, we observed some patterns in the data, it is important to acknowledge the limitations of our analysis. Our sample size was relatively small, and there may be biases in the data that we were unable to account for. Furthermore, the complex relationships between predictors and the response may require more advanced models we did not consider.
+
+Despite these limitations, we were able to identify several predictors that were important for predicting graduation rates, including Outstate, Apps, Top25perc, Top10perc, and perc.alumni. These predictors may provide valuable insights for educators and policymakers who are seeking to improve graduation rates.
+
+To make better informed decisions future studies could collect additional data on student demographics, academic performance, and extracurricular activities. This would help to provide a more comprehensive understanding of the factors that impact graduation rates, and could lead to the development of more accurate predictive models.
+
+<h1 style="font-size: 30px;">Impacts</h1>
+
+The first major impact of this work is that even though we were unable to make an efficient model to predict the graduation rate we are able to say that with this data more complex models are needed to predict the graduation rate, or that the variables within the dataset are not enough to build an accurate model. To improve accuracy it may be needed to include additional predictors with resampling to get a new dataset. Overall, my study indicates that further research needs to be done to identify a model that will accurately predict the graduation rate.
+
+Another major impact would be that it sheds light on what factors correlate with the graduation rate at different colleges. For example, we can say that the graduation rate is influenced by what percentage of the students were in the top echelon of their high school class. Meaning that students that were already on a good track are going to boost their graduation rate regardless of what college they are in. To add on, the number of applications a college gets seems to be correlated with the graduation rate and a reason for that could be that if a college has a large volume of applications they can be picky and choose the best students from their prospective high schools. Lastly, the amount of funding a school gets from alumni donating and how expensive out-of-state tuition is correlated heavily with the graduation rate. Reasons for this could be that better funding could lead to better resources, and higher tuition fees could attract more committed students that were at the top of their high schools.
+
+If people were to believe in our results it would seem that the success of a student in college would not be based on the actual education quality of a college like the quality of teachers, or how much they spend on each student, but was already predetermined by how successful a student was in high school. All of the factors that turned out to be important in predicting graduation rates seem to all influence which top students go to which college. This could lead to colleges unethically raising tuition rates to boost graduation rates or this could influence top students to not care about what college they go to since they are more likely to graduate anyway. If our results are not accurate then this could create distrust between the education system and students in the U.S. unfairly. However, if they are we need to rethink how the college education system is done within the U.S. because the foundations that it’s built upon for students’ success are not the core reasons for students’ success.
