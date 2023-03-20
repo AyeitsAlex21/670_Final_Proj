@@ -56,8 +56,6 @@ College_data = College_quant_data <- na.omit(College) %>%
 
 We can then start to visualize our data by creating a histogram of the graduation rate and a scatter plot matrices for each variable we are investigating between all other variables as well as listing their correlations.
 
-First we will start with visualizing the scatter plots for the Graduation Rate to see if there's any visual correlations there.
-
 ```{r}
 
 colnames = names(College_data)
@@ -80,7 +78,7 @@ Analyzing the scatter plots and the correlations we can see that the Private, To
 
 <h1 style="font-size: 30px;">Modeling</h1>
 
-To achieve my goal, I plan to first use a linear regression model to predict the quantitative responses. I will also experiment with using random forests and decision trees. I also plan to apply k-fold cross-validation and Lasso (in the linear regression case) to ensure the validity of my model, specifically using the Lasso method as I anticipate that not all variables will be linked to the response.
+To achieve my goal, I plan to first use a linear regression model to predict the quantitative responses. I will also experiment with using random forests and decision trees to get better results by trying to capture the more complex relationships in the data. I also plan to apply cross-validation and Lasso (in the linear regression case) to ensure the validity of my model. I will make two separate models for each model type one using a hold-out cross validation method and the other either using LOOCV or k-fold.
 
 To start we divide the data to be 70% training and 30% testing.
 
@@ -102,7 +100,7 @@ testing = na.omit(College_data[-trainIndex, ])
 
 <h1 style="font-size: 18px;">**Linear Regression**</h1>
 
-Then using these two sets of data we can fit a linear regression model using k-folds and Lasso to predict the Graduation rate. I will also fit a normal linear regression on the training data so we can infer the relationships between the predictors and response, and see how much the models performance improves using cross validation.
+Then using these two sets of data we can fit a linear regression model using k-folds and Lasso to predict the Graduation rate. I will also fit a hold-out cross-validated linear regression on the training data so we can infer the relationships between the predictors and response, and see how much the models performance improves using cross validation.
 
 ```{r}
 #----------------------------------------------------------------
@@ -146,7 +144,7 @@ message(sprintf("The Mean squared error of the linear regression with k-fold cro
 ```
 **Results of the Linear Regressions**
 
-For the k-fold cross-validated linear regression with lasso, the R^2 statistic on the test data shows that the model explains the variance ~33.52% of the time which could be better since there is still a large amount of unexplained variance. Also, a high MAE on the test data indicates that the model has a high error level with its predictions. However, the MSE value of ~198.08 is lower than the MSE for linear regression with hold-out cross-validation. This model performs far from desirable with a low R^2, and high MAE and MSE. The diagnostic plot RSME vs. Mixing Percentage shows that increasing the shrinkage parameter effects does not really effect the RMSE which is the measure of average deviation from the actual answer. 
+For the k-fold cross-validated linear regression with lasso, the R^2 statistic on the test data shows that the model explains the variance ~33.52% of the time which could be better since there is still a large amount of unexplained variance. Also, a high MAE on the test data indicates that the model has a high error level with its predictions. However, the MSE value is lower than the MSE for linear regression with hold-out cross-validation. This model performs far from desirable with a low R^2, and high MAE and MSE. The diagnostic plot RSME vs. Mixing Percentage shows that increasing the shrinkage parameter effects does not really effect the RMSE which is the measure of average deviation from the actual answer. 
 
 For the hold-out cross-validation linear regression, the R^2 statistic shows that the model explains the variance ~31.76% of the time which is not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the test data is noticeably above the MSE on the k-fold cross-validated linear regression. Although, both models preform similarly the k-fold lasso regression model wins out by having slightly better stats in all measured categories. From the diagnostic plots the we can see that the model depicts a linear relationship and no data point influences the model in abnormal way to justify taking it out.
 
@@ -154,7 +152,7 @@ For inference using variable importance measure (VIM) of what predictors are cor
 
 <h1 style="font-size: 18px;">**Decision Tree**</h1>
 
-The linear regression models could have preformed poorly due to it the predictors having non-linear relationships making a linear regression approach less effective, so to improve upon the MSE and get more insight into what predictors most influence our response we will fit a decision tree and another with LOOCV cross validation comparing the two. Note: the reason I switched to LOOCV from k-fold is that I got a resampling warning that was a side effect of k-fold which effected the validity of the model.
+The linear regression models could have preformed poorly due to it the predictors having non-linear relationships making a linear regression approach less effective, so to improve upon the MSE and get more insight into what predictors most influence our response we will fit a decision tree and another with LOOCV cross validation comparing the two. Note: the reason I switched to LOOCV from k-fold is that I got a resampling warning that was a side effect of k-fold which effected the validity of the model, but it should be fine because we will get a lower bias.
 
 ```{r}
 library(rpart)
@@ -202,9 +200,9 @@ message(sprintf("The Mean squared error of the k-fold cross validation decision 
 
 For the LOOCV cross-validated decision tree, the R^2 statistic on the test data shows that the model explains the variance ~28.78% of the time which is poor since there is still a large amount of unexplained variance. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the testing data is significantly lower than the linear regression making this model more suitable for predicting graduation rate. This model is a step up from linear regression. Although, it’s still performing far from desirable with an abysmally low R^2, and high MAE and MSE.
 
-For the hold-out cross-validation decision tree, the R^2 statistic shows that the model explains the variance ~28.78% of the time which is the same as the LOOCV cross-validated version and not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high level of error with its predictions. However, the MSE on the test data is equivalent to the MSE on the LOOCV cross-validated decision tree. The similarity of statistics between the LOOCV cross-validated and the hold-out cross-validated decision trees could be because of randomness in the data or the training data is not representative of results in the real world. Another reason could be because the LOOCV method is preforming equivalently to hold-out because they yield the same results with a large enough dataset.
+For the hold-out cross-validation decision tree, the R^2 statistic shows that the model explains the variance ~28.78% of the time which is the same as the LOOCV cross-validated version and not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high level of error with its predictions. However, the MSE on the test data is equivalent to the MSE on the LOOCV cross-validated decision tree. The similarity of statistics between the LOOCV cross-validated and the hold-out cross-validated decision trees could be because of randomness in the data or the training data is not representative of results in the real world.
 
-To comment on the actual tree visuals both are the same most likely because they are working with the same training data making their optimal complexity parameters equal. Therefore, yielding the same tree.
+Another reason and to comment on the actual tree visuals, both are the same most likely because they are working with the same training data making their optimal complexity parameters equal. Therefore, yielding the same tree.
 
 For inference using variable importance measure (VIM) and looking at the decision tree graphs we can see what predictors are correlated with the response graduation rate, we can see for both the hold-out cross-validation decision tree and the LOOCV cross-validated decision tree the most important variables are: Outstate, Apps, Top25perc, Top10perc, and perc.alumni. 
 
@@ -242,7 +240,6 @@ MaeCrossRand = mae(pred, testing$Grad.Rate)
 RsqCrossRand = R2(pred, testing$Grad.Rate)
 
 message(sprintf("Random forest with hold-out cross validation statistics are:"))
-message("Variable importance for the random forest with hold-out cross validation is:")
 varImpPlot(rand.forest)
 print(varImp(rand.forest))
 message(sprintf("Random forest with hold-out cross validation statistic R^2 is %f", RsqRand))
@@ -250,7 +247,6 @@ message(sprintf("Random forest with hold-out cross validation statistic MAE is %
 message(sprintf("The Mean squared error of the random forest is %f", mseRand))
 
 message(sprintf("Random forest with LOOCV cross validation statistics are:"))
-message("Variable importance for the random forest with k-fold cross validation is:")
 varImpPlot(cv.fitRand$finalModel)
 print(varImp(cv.fitRand$finalModel))
 message(sprintf("Random forest with LOOCV cross validation statistic R^2 is %f", RsqCrossRand))
@@ -332,9 +328,9 @@ For inference using variable importance measure (VIM) of what predictors are cor
 </table>
 
 
-Overall, our models were not able to accurately predict graduation rates. The best performing model was the random forest with k-fold cross-validation, but even this model had a relatively low R2 and high MSE and MAE. suggesting that the available data on graduation rates may not be currently sufficient for making a accurate model meaning further research is needed to identify the most influential variables that impact graduation rates.
+Overall, our models were not able to accurately predict graduation rates ont the test data. The best performing model was the random forest with k-fold cross-validation, but even this model had a relatively low R2 and high MSE and MAE. suggesting that the available data on graduation rates may not be currently sufficient for making a accurate model meaning further research is needed to identify the most influential variables that impact graduation rates.
 
-Even though, we observed some patterns in the data, it is important to acknowledge the limitations of our analysis. Our sample size was relatively small, and there may be biases in the data that we were unable to account for. Furthermore, the complex relationships between predictors and the response may require more advanced models we did not consider.
+Even though, we observed some patterns in the data, it is important to acknowledge the limitations of our analysis. Our sample size may be relatively small, and there may be biases in the data that we were unable to account for. Furthermore, the complex relationships between predictors and the response may require more advanced models we did not consider.
 
 Despite these limitations, we were able to identify several predictors that were important for predicting graduation rates, including Outstate, Apps, Top25perc, Top10perc, and perc.alumni. These predictors may provide valuable insights for educators and policymakers who are seeking to improve graduation rates.
 
