@@ -266,7 +266,6 @@ For inference using variable importance measure (VIM) of what predictors are cor
 
 <style>
   table {
-    border-collapse: collapse;
     width: 100%;
   }
   th, td {
