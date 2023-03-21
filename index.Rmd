@@ -260,7 +260,7 @@ For the k-fold cross-validated random forest, the R^2 statistic on the test data
 
 For the hold-out cross-validation random forest, the R^2 statistic shows that the model explains the variance ~36.99% of the time which is not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the test data is just above the MSE on the k-fold cross-validated random forest This similarity of statistics between the k-fold cross-validated and the hold-out cross-validation validated random forests could be because of randomness in the data or the training data is not representative of results in the real world.
 
-For inference using variable importance measure (VIM) of what predictors are correlated with the response graduation rate, we can see for both the hold-out cross-validation random forest and the k-fold cross-validated random forest the most important variables are: Outstate, Top25perc, Top10perc, and perc.alumni, Room.Board.
+For inference using variable importance measure (VIM) of what predictors are correlated with the response graduation rate as well as the variable importance graphs, we can see for both the hold-out cross-validation random forest and the k-fold cross-validated random forest the most important variables are: Outstate, Top25perc, Top10perc, and perc.alumni, Room.Board.
 
 <h1 style="font-size: 30px;">Overall Results, Analysis, and Discussions</h1>
 
