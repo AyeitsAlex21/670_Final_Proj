@@ -107,6 +107,10 @@ Then using these two sets of data we can fit a linear regression model using k-f
 # Fit on training data
 cv = trainControl(method = "cv", number = k)
 shrink.mod = train(Grad.Rate ~ ., data = training, method = "glmnet", trControl = cv)
+lambdaBest = shrink.mod$bestTune$lambda
+
+# Fit the Lasso model with the best lambda value
+lasso.fit <- glmnet(x = model.matrix(Grad.Rate ~ ., data = training), y = training$Grad.Rate, alpha = 1, lambda = lambdaBest)
 
 lm.fit = lm(Grad.Rate ~ ., data=training)
 
@@ -126,7 +130,9 @@ Rsqlm = R2(shrink.pred, testing$Grad.Rate)
 
 
 
-message("Metrics for for the decision linear regression with hold-out cross validation")
+message("Metrics for the linear regression with hold-out cross validation")
+message("Coefficients for the linear regression with hold-out cross validation")
+print(coef(lm.fit))
 par(mfrow = c(2, 2))
 plot(lm.fit)
 print(varImp(lm.fit))
@@ -135,8 +141,8 @@ message(sprintf("Linear regression with hold-out cross validation statistic MAE 
 message(sprintf("The Mean squared error of the linear regression with hold-out cross validation is %f", MSElm))
 
 message("Metrics for for the Linear regression with k-fold cross validation and lasso fit")
-summary(cv.fit$results)
-plot(shrink.mod)
+message("Coefficients of the Linear regression with k-fold cross validation and lasso fit")
+print(coef(lasso.fit))
 print(varImp(cv.fit$finalModel))
 message(sprintf("Linear regression with k-fold cross validation and lasso statistic R^2 is %f", Rsqk))
 message(sprintf("Linear regression with k-fold cross validation and lasso statistic MAE is %f", Maek))
@@ -144,9 +150,9 @@ message(sprintf("The Mean squared error of the linear regression with k-fold cro
 ```
 **Results of the Linear Regressions**
 
-For the k-fold cross-validated linear regression with lasso, the R^2 statistic on the test data shows that the model explains the variance ~33.52% of the time which could be better since there is still a large amount of unexplained variance. Also, a high MAE on the test data indicates that the model has a high error level with its predictions. However, the MSE value is lower than the MSE for linear regression with hold-out cross-validation. This model performs far from desirable with a low R^2, and high MAE and MSE. The diagnostic plot RSME vs. Mixing Percentage shows that increasing the shrinkage parameter effects does not really effect the RMSE which is the measure of average deviation from the actual answer. 
+For the k-fold cross-validated linear regression with lasso, the R^2 statistic on the test data shows that the model explains ~33.52% of the variance which could be better since there is still a large amount of unexplained variance. Also, a high MAE on the test data indicates that the model has a high error level with its predictions. However, the MSE value is lower than the MSE for linear regression with hold-out cross-validation. This model performs far from desirable with a low R^2, and high MAE and MSE. The diagnostic plot RSME vs. Mixing Percentage shows that increasing the shrinkage parameter effects does not really effect the RMSE which is the measure of average deviation from the actual answer. We can also see that the coefficients for Accept and F.undergrad were reduced to 0 impact this plot meaning that the lasso fit deemed them unimportant contributors to the final model, and from these coefficients its hard to say which ones the lasso fit deemed more impactful since each predictor has varying ranges. Meaning to infer which predictors are most likely correlated with the response we need to do a variable importance measure for this model.
 
-For the hold-out cross-validation linear regression, the R^2 statistic shows that the model explains the variance ~31.76% of the time which is not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the test data is noticeably above the MSE on the k-fold cross-validated linear regression. Although, both models preform similarly the k-fold lasso regression model wins out by having slightly better stats in all measured categories. From the diagnostic plots the we can see that the model depicts a linear relationship and no data point influences the model in abnormal way to justify taking it out.
+For the hold-out cross-validation linear regression, the R^2 statistic shows that the model explains ~31.76% of the variance which is not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the test data is noticeably above the MSE on the k-fold cross-validated linear regression. Although, both models preform similarly the k-fold lasso regression model wins out by having slightly better stats in all measured categories. From the diagnostic plots the we can see that the model depicts a linear relationship and no data point influences the model in abnormal way to justify taking it out. As for the coefficients of the model its hard to say which ones had the most impact since the ranges that each predictor can be vary drastically hence we need to look at the variable importance statistic.
 
 For inference using variable importance measure (VIM) of what predictors are correlated with the response graduation rate, we can see for both the hold-out cross-validation linear regression and the k-fold cross-validated linear regression the most important variables are: Outstate, Apps, Top25perc, Top10perc, and perc.alumni.
 
@@ -198,9 +204,9 @@ message(sprintf("The Mean squared error of the k-fold cross validation decision 
 
 **Results of the Decision Trees**
 
-For the LOOCV cross-validated decision tree, the R^2 statistic on the test data shows that the model explains the variance ~28.78% of the time which is poor since there is still a large amount of unexplained variance. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the testing data is significantly lower than the linear regression making this model more suitable for predicting graduation rate. This model is a step up from linear regression. Although, it’s still performing far from desirable with an abysmally low R^2, and high MAE and MSE.
+For the LOOCV cross-validated decision tree, the R^2 statistic on the test data shows that the model explains ~28.78% of the variance which is poor since there is still a large amount of unexplained variance. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the testing data is significantly lower than the linear regression making this model more suitable for predicting graduation rate. This model is a step up from linear regression. Although, it’s still performing far from desirable with an abysmally low R^2, and high MAE and MSE.
 
-For the hold-out cross-validation decision tree, the R^2 statistic shows that the model explains the variance ~28.78% of the time which is the same as the LOOCV cross-validated version and not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high level of error with its predictions. However, the MSE on the test data is equivalent to the MSE on the LOOCV cross-validated decision tree. The similarity of statistics between the LOOCV cross-validated and the hold-out cross-validated decision trees could be because of randomness in the data or the training data is not representative of results in the real world.
+For the hold-out cross-validation decision tree, the R^2 statistic shows that the model explains ~28.78% of the variance which is the same as the LOOCV cross-validated version and not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high level of error with its predictions. However, the MSE on the test data is equivalent to the MSE on the LOOCV cross-validated decision tree. The similarity of statistics between the LOOCV cross-validated and the hold-out cross-validated decision trees could be because of randomness in the data or the training data is not representative of results in the real world.
 
 Another reason and to comment on the actual tree visuals, both are the same most likely because they are working with the same training data making their optimal complexity parameters equal. Therefore, yielding the same tree.
 
@@ -256,9 +262,9 @@ message(sprintf("The Mean squared error of the k-fold cross validation random fo
 
 **Results of the Random Forests**
 
-For the k-fold cross-validated random forest, the R^2 statistic on the test data shows that the model explains the variance ~37.22% of the time which could be better since there is still a large amount of unexplained variance. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the testing data is significantly lower than the linear regression and decision tree models, making this model more suitable for predicting graduation rates. This model is the best performing so far in predicting the graduation rate. Although, it still performs far from desirable with an abysmally low R^2, and high MAE and MSE.
+For the k-fold cross-validated random forest, the R^2 statistic on the test data shows that the model explains ~37.22% of the variance which could be better since there is still a large amount of unexplained variance. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the testing data is significantly lower than the linear regression and decision tree models, making this model more suitable for predicting graduation rates. This model is the best performing so far in predicting the graduation rate. Although, it still performs far from desirable with an abysmally low R^2, and high MAE and MSE.
 
-For the hold-out cross-validation random forest, the R^2 statistic shows that the model explains the variance ~36.99% of the time which is not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the test data is just above the MSE on the k-fold cross-validated random forest This similarity of statistics between the k-fold cross-validated and the hold-out cross-validation validated random forests could be because of randomness in the data or the training data is not representative of results in the real world.
+For the hold-out cross-validation random forest, the R^2 statistic shows that the model explains ~36.99% of the variance which is not desirable for the same reason that there is still a large portion of unexplained variance that the model does not capture. Also, the MAE value on the test data indicates that the model has a high error level with its predictions. However, the MSE on the test data is just above the MSE on the k-fold cross-validated random forest This similarity of statistics between the k-fold cross-validated and the hold-out cross-validation validated random forests could be because of randomness in the data or the training data is not representative of results in the real world.
 
 For inference using variable importance measure (VIM) of what predictors are correlated with the response graduation rate as well as the variable importance graphs, we can see for both the hold-out cross-validation random forest and the k-fold cross-validated random forest the most important variables are: Outstate, Top25perc, Top10perc, and perc.alumni, Room.Board.
 
@@ -327,7 +333,7 @@ For inference using variable importance measure (VIM) of what predictors are cor
 </table>
 
 
-Overall, our models were not able to accurately predict graduation rates on the test data. The best performing model was the random forest with k-fold cross-validation, but even this model had a relatively low R2 and high MSE and MAE. suggesting that the available data on graduation rates may not be currently sufficient for making a accurate model meaning further research is needed to identify the most influential variables that impact graduation rates.
+Overall, our models were not able to accurately predict graduation rates on the test data. The best performing model was the random forest with k-fold cross-validation, but even this model had a relatively low R^2 and high MSE and MAE. suggesting that the available data on graduation rates may not be currently sufficient for making a accurate model meaning further research is needed to identify the most influential variables that impact graduation rates.
 
 Even though, we observed some patterns in the data, it is important to acknowledge the limitations of our analysis. Our sample size may be relatively small, and there may be biases in the data that we were unable to account for. Furthermore, the complex relationships between predictors and the response may require more advanced models we did not consider.
 
@@ -348,3 +354,7 @@ Also, our study suggests that colleges with larger numbers of applications tend 
 Lastly, our study could create a more accountable education system by encouraging the identification of other factors that influence graduation rates, and improving upon them could help to increase graduation rates. For example, if another study motivated by ours shows that students from certain socioeconomic are less likely to graduate from college, colleges could create support programs to help these students succeed.
 
 Overall, our study suggests that the factors that influence graduation rates are complex and not yet fully explored. However, by gaining a better understanding of more factors and complex relationships, we can work towards creating a more equitable and effective education system that helps all students succeed.
+
+<h1 style="font-size: 30px;">Credits</h1>
+
+I had chatGPT rewrite the overall results, analysis, discussion and the impact sections to get my points across more clearly based on a rough draft of what I had already written.
